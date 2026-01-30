@@ -5,7 +5,7 @@ import numpy as np
 import io
 import datetime
 
-st.set_page_config(page_title="Gestor Stock - V9 Final", layout="wide", page_icon="🏭")
+st.set_page_config(page_title="Gestor Stock - V10 Precisión", layout="wide", page_icon="🎯")
 
 # --- ESTILOS ---
 st.markdown("""
@@ -49,14 +49,13 @@ with st.sidebar:
 # --- FUNCIONES DE CEREBRO ---
 
 def find_header_row(file):
-    """Busca en qué fila empiezan los títulos reales (Descripción, Stock, etc)"""
+    """Busca en qué fila empiezan los títulos reales"""
     df_temp = pd.read_excel(file, header=None, nrows=15)
     for i, row in df_temp.iterrows():
         row_str = row.astype(str).str.lower().tolist()
-        # Si la fila tiene palabras clave como 'descrip' o 'articulo' Y 'stock' o 'cant'
         if any('descrip' in x for x in row_str) or (any('articulo' in x for x in row_str) and any('stock' in x for x in row_str)):
             return i
-    return 0 # Si no encuentra, asume fila 0
+    return 0
 
 def fraction_to_float(text):
     """Convierte '2 1/2' -> 2.5 de forma robusta"""
@@ -72,31 +71,46 @@ def fraction_to_float(text):
     return None
 
 def extract_regex(desc):
-    """Extrae datos del texto de descripción"""
+    """Extrae datos con PRECISIÓN QUIRÚRGICA"""
     d = {"DN_Txt": None, "SCH": None, "Esp": None, "Tira": 6.0}
     t = str(desc)
     
-    # DN: Busca numero antes de comilla o espacio (2" o 2 1/2)
-    m_dn = re.search(r'(\d+[\s-]?\d*/?\d*)(?="|\s|$)', t)
-    if m_dn: d["DN_Txt"] = m_dn.group(1).replace('-', ' ')
+    # --- FIX CRÍTICO V10: EXIGIR COMILLAS ---
+    # Busca patrones como: 6" | 2 1/2" | 1/2" | 2.5"
+    # El (?=") significa "que esté seguido de una comilla"
+    # Esto evita confundir A-53 con 53 pulgadas.
     
+    # Regex explicada:
+    # (\d+\s+\d+/\d+) -> Fracciones mixtas (2 1/2)
+    # | (\d+/\d+)     -> Fracciones puras (1/2)
+    # | (\d+(?:[.,]\d+)?) -> Numeros enteros o decimales (6 o 6.5)
+    # Todo seguido de espacios opcionales \s* y la comilla "
+    
+    match_dn = re.search(r'(\d+\s+\d+/\d+|\d+/\d+|\d+(?:[.,]\d+)?)\s*"', t)
+    
+    if match_dn: 
+        d["DN_Txt"] = match_dn.group(1).replace(',', '.')
+    else:
+        # Fallback: Si no tiene comillas, buscamos palabra clave "pulg"
+        match_pulg = re.search(r'(\d+(?:[.,]\d+)?)\s*pulg', t, re.IGNORECASE)
+        if match_pulg: d["DN_Txt"] = match_pulg.group(1)
+
     # SCH
-    m_sch = re.search(r'Sch\.?\s?(\d+|STD|XS)', t, re.IGNORECASE)
-    if m_sch: d["SCH"] = m_sch.group(1)
+    match_sch = re.search(r'Sch\.?\s?(\d+|STD|XS)', t, re.IGNORECASE)
+    if match_sch: d["SCH"] = match_sch.group(1)
     
     # Tira
-    m_mts = re.search(r'(\d+(?:[.,]\d+)?)\s*Mts', t, re.IGNORECASE)
-    if m_mts: d["Tira"] = float(m_mts.group(1).replace(',', '.'))
+    match_tira = re.search(r'(\d+(?:[.,]\d+)?)\s*Mts', t, re.IGNORECASE)
+    if match_tira: d["Tira"] = float(match_tira.group(1).replace(',', '.'))
     
     # Espesor Manual (si dice x 6.35 x)
-    m_esp = re.search(r'[xX]\s*(\d+[,.]\d+)\s*[xX]', t)
-    if m_esp: d["Esp"] = float(m_esp.group(1).replace(',', '.'))
+    match_esp = re.search(r'[xX]\s*(\d+[,.]\d+)\s*[xX]', t)
+    if match_esp: d["Esp"] = float(match_esp.group(1).replace(',', '.'))
     
     return pd.Series(d)
 
 def load_asme_engine(file):
     try:
-        # Busca header ASME
         df_raw = pd.read_excel(file, sheet_name="TABLA ASME-B36.10M", header=None, engine='openpyxl')
         h_idx = 2
         for i in range(15):
@@ -105,7 +119,6 @@ def load_asme_engine(file):
             
         df = pd.read_excel(file, sheet_name="TABLA ASME-B36.10M", header=h_idx, engine='openpyxl')
         
-        # Busca columnas
         cols = [str(c) for c in df.columns]
         c_dn = next((c for c in cols if 'nps' in c.lower() or 'diameter' in c.lower()), None)
         c_sch = next((c for c in cols if 'schedule' in c.lower()), None)
@@ -117,7 +130,6 @@ def load_asme_engine(file):
         df = df[[c_dn, c_sch, c_esp, c_peso]].dropna()
         df.columns = ['DN', 'SCH', 'Esp', 'Peso']
         
-        # Limpieza matematica
         df['DN_Float'] = df['DN'].apply(fraction_to_float)
         df['Esp'] = pd.to_numeric(df['Esp'], errors='coerce')
         df['Peso'] = pd.to_numeric(df['Peso'], errors='coerce')
@@ -127,50 +139,37 @@ def load_asme_engine(file):
     except Exception as e: return None, str(e)
 
 # --- APP PRINCIPAL ---
-st.title("🏭 Visor de Stock V9 (Auto-Detect)")
+st.title("🏭 Visor de Stock V10 (Precisión DN)")
 
 if uploaded_file:
-    # 1. DETECCIÓN AUTOMÁTICA DE ENCABEZADOS
+    # 1. AUTO-DETECTAR HEADER
     header_row = find_header_row(uploaded_file)
-    if header_row > 0:
-        st.info(f"💡 Detecté que la tabla empieza en la fila {header_row+1}. Ajustando automáticamente...")
-    
-    # Recargar con el header correcto
     uploaded_file.seek(0)
     df_prov = pd.read_excel(uploaded_file, header=header_row)
     
-    # 2. SELECTOR DE COLUMNAS (CRÍTICO)
+    # 2. SELECTOR DE COLUMNAS
     cols = df_prov.columns.tolist()
-    
-    # Intentar adivinar la columna descripcion (evitar 'Codigo')
     idx_desc = 0
     for i, c in enumerate(cols):
-        c_lower = str(c).lower()
-        if 'descrip' in c_lower: idx_desc = i; break
+        if 'descrip' in str(c).lower(): idx_desc = i; break
     
-    # Intentar adivinar cantidad
     idx_cant = 2
     for i, c in enumerate(cols):
-        c_lower = str(c).lower()
-        if any(x in c_lower for x in ['disp', 'stock', 'cant', 'saldo']): idx_cant = i; break
+        if any(x in str(c).lower() for x in ['disp', 'stock', 'cant', 'saldo']): idx_cant = i; break
 
-    st.markdown("### 🛠️ Paso 1: Confirma las Columnas")
+    st.info("Configura las columnas y presiona Procesar.")
     c1, c2 = st.columns(2)
-    col_desc = c1.selectbox("¿Cuál es la DESCRIPCIÓN? (Ej: Tubo ASTM...)", cols, index=idx_desc)
-    col_cant = c2.selectbox("¿Cuál es la CANTIDAD?", cols, index=idx_cant)
-    
-    # Muestra de seguridad
-    st.caption(f"Ejemplo de lo que voy a leer en **{col_desc}**: _{df_prov[col_desc].iloc[0]}_")
+    col_desc = c1.selectbox("Columna DESCRIPCIÓN:", cols, index=idx_desc)
+    col_cant = c2.selectbox("Columna CANTIDAD:", cols, index=idx_cant)
     
     if st.button("🚀 PROCESAR AHORA", type="primary"):
-        # Cargar ASME
         fuente = archivo_asme if use_local_asme else uploaded_asme
         if not fuente: st.error("Falta ASME"); st.stop()
         
         df_asme, msg = load_asme_engine(fuente)
         if df_asme is None: st.error(msg); st.stop()
         
-        with st.spinner("Analizando..."):
+        with st.spinner("Analizando con Nueva Lógica V10..."):
             df_final = df_prov.copy()
             
             # 1. Extraer Info
@@ -189,14 +188,10 @@ if uploaded_file:
                 
                 match = pd.DataFrame()
                 if pd.notna(dn_val):
-                    # Filtro DN (tolerancia)
                     base = df_asme[np.isclose(df_asme['DN_Float'], dn_val, atol=0.05)]
-                    
                     if not base.empty:
                         if sch: match = base[base['SCH'] == sch]
                         elif pd.notna(esp_man): match = base[np.isclose(base['Esp'], esp_man, atol=0.25)]
-                        
-                        # Fallback: si encontró DN pero no SCH/Esp, tomar promedio (mejor que 0)
                         if match.empty: match = base.head(1) 
                 
                 if not match.empty:
@@ -213,7 +208,7 @@ if uploaded_file:
             # 3. Cálculos
             def clean_num(x):
                 s = str(x).strip()
-                if '.' in s and ',' in s: s = s.replace('.','').replace(',','.') # 1.000,00 -> 1000.00
+                if '.' in s and ',' in s: s = s.replace('.','').replace(',','.') 
                 elif ',' in s: s = s.replace(',','.')
                 try: return float(re.sub(r'[^\d.]', '', s))
                 except: return 0.0
@@ -225,8 +220,13 @@ if uploaded_file:
             # 4. Tipos y Precios
             def get_tipo(t):
                 t = str(t).lower()
-                if "iso" in t: return "3. CCC ISO Negra" if "negra" in t else "5. CCC ISO Galvanizada"
+                if "iso" in t and "negra" in t: return "3. CCC ISO Negra"
+                if "iso" in t and "galva" in t: return "5. CCC ISO Galvanizada"
                 if "astm" in t and "a-53" in t: return "1. CCC ASTM A53 / API 5L"
+                if "galva" in t and "bsp" in t: return "8. CCC ASTM A-53 Galva R65 H/BSP"
+                if "galva" in t: return "7. CCC ASTM A-53 Galva"
+                if "a795" in t and "ranurada" in t: return "4a. CCC A795 Negra - Ranurada"
+                if "a795" in t: return "4. CCC A795 Negra"
                 return "⚠️ MANUAL"
             
             df_final['TIPO_SISTEMA'] = df_final[col_desc].apply(get_tipo)
@@ -242,12 +242,10 @@ if uploaded_file:
             df_final['Techo_Kg'] = pxs.apply(lambda x: x[1])
             df_final['Piso_Mt'] = df_final['Piso_Kg'] * df_final['Peso_Unitario']
             
-            # Guardar en sesión
-            cols_ok = [col_desc, 'TIPO_SISTEMA', 'DN_Txt', 'SCH', 'Espesor_Final', 'Stock_Mts', 'Stock_Kgs', 'Piso_Kg', 'Techo_Kg', 'Piso_Mt']
-            st.session_state['data'] = df_final[cols_ok]
+            st.session_state['data'] = df_final
             
-            if matches > 0: st.success(f"✅ ¡Éxito! {matches} Artículos procesados correctamente.")
-            else: st.error("⚠️ Alerta: No se cruzaron datos. Revisa si la columna Descripción es la correcta.")
+            if matches > 0: st.success(f"✅ ¡Éxito! {matches} Artículos procesados.")
+            else: st.error("⚠️ Alerta: No se cruzaron datos.")
             st.rerun()
 
 # --- VISUALIZADOR ---
@@ -299,4 +297,4 @@ if st.session_state.get('data') is not None:
     if st.button("🔄 Reiniciar"): st.session_state['data'] = None; st.rerun()
 
 else:
-    st.info("👆 Sube tu archivo. El sistema detectará dónde empieza la tabla automáticamente.")
+    st.info("👆 Sube tu archivo. Ahora sí funcionará.")
