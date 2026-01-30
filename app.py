@@ -52,21 +52,23 @@ def fraction_to_float(text):
     if pd.isna(text): return None
     t = str(text).strip().replace('"', '')
     try:
-        # Caso decimal directo
+        # Intento 1: Es un número normal (ej: 2.5)
         return float(t)
     except:
+        # Intento 2: Es una fracción (ej: 2 1/2)
         try:
-            # Caso fracción mixta "2 1/2"
-            if ' ' in t:
-                whole, frac = t.split()
-                num, den = frac.split('/')
-                return float(whole) + float(num)/float(den)
-            # Caso fracción pura "1/2"
-            elif '/' in t:
+            if ' ' in t: # Caso mixto "2 1/2"
+                parts = t.split()
+                if len(parts) == 2:
+                    whole = float(parts[0])
+                    num, den = parts[1].split('/')
+                    return whole + (float(num)/float(den))
+            elif '/' in t: # Caso simple "1/2"
                 num, den = t.split('/')
                 return float(num)/float(den)
+        except:
             return None
-    except: return None
+    return None
 
 def cargar_asme_engine(file):
     try:
@@ -83,15 +85,18 @@ def cargar_asme_engine(file):
         # Mapeo inteligente
         def fcol(keys, cols):
             for c in cols:
-                if all(k in str(c).lower() for k in keys): return c
+                if any(k in str(c).lower() for k in keys): return c
             return None
             
-        c_dn = fcol(['nps'], df_asme.columns) or fcol(['diameter', 'in.'], df_asme.columns)
-        c_sch = fcol(['scheduleno'], df_asme.columns) or fcol(['schedule'], df_asme.columns)
+        c_dn = fcol(['nps', 'diameter'], df_asme.columns)
+        c_sch = fcol(['scheduleno', 'schedule'], df_asme.columns)
         c_esp = fcol(['thickness', 'mm'], df_asme.columns)
         c_peso = fcol(['mass', 'kg/m'], df_asme.columns)
         
-        if not all([c_dn, c_sch, c_esp, c_peso]): return None, "Faltan columnas en ASME"
+        if not all([c_dn, c_sch, c_esp, c_peso]): 
+            # Intento de búsqueda fallback más agresivo
+            cols_str = [str(c).lower() for c in df_asme.columns]
+            return None, f"No encontré columnas. Vi esto: {cols_str}"
         
         df = df_asme[[c_dn, c_sch, c_esp, c_peso]].copy()
         df.columns = ['DN_Raw', 'SCH', 'Espesor_mm', 'Peso_Kg_m']
@@ -143,7 +148,7 @@ def safe_clean_qty(val):
     except: return 0.0
 
 # --- MAIN ---
-st.title("🏭 Visor de Stock V7")
+st.title("🏭 Visor de Stock V7.1")
 
 if uploaded_file:
     df_prev = pd.read_excel(uploaded_file)
@@ -187,6 +192,7 @@ if uploaded_file:
                 match = pd.DataFrame()
                 if pd.notna(dn_val):
                     # Filtramos ASME por valor numérico (2.5 == 2.5)
+                    # Usamos tolerancia pequeña
                     base = df_asme[np.isclose(df_asme['DN_Float'], dn_val, atol=0.01)]
                     
                     if not base.empty:
@@ -260,7 +266,7 @@ if st.session_state.get('data') is not None:
     df['SCH'] = df['SCH'].fillna("?")
     
     f_tipo = c1.selectbox("Tipo", ["Todos"] + sorted(df['TIPO_SISTEMA'].unique()))
-    f_dn = c2.selectbox("DN", ["Todos"] + sorted(df['DN_Txt'].unique()))
+    f_dn = c2.selectbox("DN", ["Todos"] + sorted(df['DN_Txt'].astype(str).unique()))
     f_sch = c3.selectbox("SCH", ["Todos"] + sorted(df['SCH'].astype(str).unique()))
     f_esp = c4.selectbox("Espesor", ["Todos"] + sorted(df['Espesor_Final'].unique()))
     
@@ -293,6 +299,7 @@ if st.session_state.get('data') is not None:
             "TIPO_SISTEMA": st.column_config.SelectboxColumn("Tipo", options=opciones_tipo, required=True),
             "Px_Piso_Kg": st.column_config.NumberColumn("USD/Kg Piso", format="$ %.2f"),
             "Px_Techo_Kg": st.column_config.NumberColumn("USD/Kg Techo", format="$ %.2f"),
+            "Px_Piso_Mt": st.column_config.NumberColumn("USD/Mt Piso", format="$ %.2f"),
             "Stock_Kgs": st.column_config.NumberColumn("Total Kg", format="%.0f"),
         },
         use_container_width=True, hide_index=True
