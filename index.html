@@ -1,0 +1,3661 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Autorización de Carga · Cuenca del Sur</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f5f2ed;
+  --surface: #ffffff;
+  --surface2: #eeeae3;
+  --border: #d8d2c8;
+  --border-dark: #b8b0a2;
+  --text: #1a1714;
+  --text-muted: #7a7268;
+  --text-dim: #b0a898;
+  --accent: #1a4fd6;
+  --accent-light: #e8eeff;
+  --green: #1a7a3c;
+  --green-light: #e6f4ec;
+  --yellow: #9a6800;
+  --yellow-light: #fef6e0;
+  --orange: #c45000;
+  --orange-light: #fff0e6;
+  --red: #c42b1c;
+  --red-light: #fde8e6;
+  --mono: 'DM Mono', monospace;
+  --sans: 'DM Sans', sans-serif;
+  --display: 'Syne', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--text);
+  color: white;
+  padding: 0 40px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.brand-logo {
+  background: var(--accent);
+  color: white;
+  font-family: var(--display);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 3px;
+  padding: 5px 12px;
+  text-transform: uppercase;
+}
+
+.brand-title {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: rgba(255,255,255,0.9);
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.clock {
+  text-align: right;
+}
+
+.clock-time {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 500;
+  color: #7eb8ff;
+  letter-spacing: 2px;
+}
+
+.clock-date {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  letter-spacing: 1px;
+}
+
+.btn-reload {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: rgba(255,255,255,0.8);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 6px 14px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.btn-reload:hover { background: rgba(255,255,255,0.2); }
+.btn-reload.loading { opacity: 0.5; pointer-events: none; }
+
+/* ── STATS ── */
+.stats {
+  background: var(--text);
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding: 16px 40px;
+  display: flex;
+  gap: 0;
+}
+
+.stat {
+  flex: 1;
+  padding: 0 24px;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.stat:first-child { padding-left: 0; }
+.stat:last-child { border-right: none; }
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.35);
+}
+
+.stat-value {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  color: white;
+  line-height: 1;
+}
+
+.stat-value.pendiente { color: #f5c842; }
+.stat-value.autorizado { color: #4ade80; }
+.stat-value.parcial { color: #fb923c; }
+
+/* ── MAIN LAYOUT ── */
+.main {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 0;
+  min-height: calc(100vh - 140px);
+}
+
+/* ── TABLE AREA ── */
+.table-area {
+  padding: 28px 32px 40px 40px;
+  border-right: 1px solid var(--border);
+}
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.table-title {
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sheet-badge {
+  font-family: var(--mono);
+  font-size: 9px;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 3px 8px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border: 1px solid rgba(26,79,214,0.2);
+}
+
+.filters {
+  display: flex;
+  gap: 4px;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 5px 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+
+.filter-btn:hover { border-color: var(--border-dark); color: var(--text); }
+.filter-btn.active {
+  background: var(--text);
+  border-color: var(--text);
+  color: white;
+}
+
+/* ── TABLE ── */
+.table-wrap {
+  border: 1px solid var(--border);
+  background: white;
+  overflow: hidden;
+}
+
+.t-head {
+  display: grid;
+  grid-template-columns: 80px 1fr 180px 90px 60px 110px 130px;
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  gap: 8px;
+}
+
+.th {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.np-row-wrap {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.np-row-wrap:last-child { border-bottom: none; }
+.np-row-wrap:hover { background: #faf9f7; }
+.np-row-wrap.autorizado { background: var(--green-light); }
+.np-row-wrap.parcial { background: var(--orange-light); }
+
+.np-row {
+  display: grid;
+  grid-template-columns: 80px 1fr 180px 90px 60px 110px 130px;
+  padding: 12px 16px;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.td { font-size: 12px; color: var(--text); }
+
+.td-np {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+}
+
+.td-cliente {
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.td-detalle {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.4;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.td-cant {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.td-um {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border-radius: 2px;
+}
+.status-pill.pendiente { background: var(--yellow-light); color: var(--yellow); }
+.status-pill.autorizado { background: var(--green-light); color: var(--green); }
+.status-pill.parcial { background: var(--orange-light); color: var(--orange); }
+
+.btn-autorizar {
+  background: var(--text);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  padding: 6px 12px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+  width: 100%;
+}
+.btn-autorizar:hover { opacity: 0.75; }
+
+.btn-ver {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 5px 10px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  width: 100%;
+  transition: all 0.15s;
+}
+.btn-ver:hover { border-color: var(--border-dark); color: var(--text); }
+
+/* EXPAND PANEL */
+.np-expand {
+  display: none;
+  border-top: 1px solid var(--border);
+  padding: 16px 20px;
+  background: #faf9f7;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.np-expand.open { display: flex; }
+
+.expand-col {
+  flex: 1;
+  min-width: 180px;
+}
+
+.expand-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.qty-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qty-inp {
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 6px 10px;
+  width: 90px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.qty-inp:focus { border-color: var(--accent); }
+
+.qty-um {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.qty-hint {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 4px;
+  font-style: italic;
+}
+
+/* MAIL PREVIEW inside expand */
+.mail-prev {
+  flex: 2;
+  min-width: 260px;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+}
+
+.mail-prev-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.mail-subj {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  margin-bottom: 6px;
+  word-break: break-word;
+  font-weight: 500;
+}
+
+.mail-body-prev {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.expand-send-col {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 130px;
+  justify-content: flex-end;
+  align-self: flex-end;
+}
+
+.btn-send-real {
+  background: var(--green);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  padding: 10px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.btn-send-real:hover { opacity: 0.85; }
+.btn-send-real:disabled { background: var(--border); color: var(--text-dim); cursor: not-allowed; }
+
+.btn-mark-parcial {
+  background: transparent;
+  border: 1px solid var(--orange);
+  color: var(--orange);
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 7px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.btn-mark-parcial:hover { background: var(--orange-light); }
+
+/* ── SIDEBAR ── */
+.sidebar {
+  padding: 28px 28px 40px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-title {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.5px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid var(--text);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sidebar-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+
+.sidebar-input {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 7px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+  resize: none;
+}
+.sidebar-input:focus { border-color: var(--accent); }
+
+textarea.sidebar-input {
+  min-height: 80px;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+/* FIRMA PREVIEW */
+.firma-preview {
+  background: white;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px;
+}
+
+.firma-nombre {
+  font-family: var(--display);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.firma-cargo {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.firma-dato {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.firma-dato span { color: var(--text-dim); }
+
+/* DESTINATARIOS */
+.dest-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.dest-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: white;
+  border: 1px solid var(--border);
+  padding: 5px 8px;
+}
+
+.dest-email {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text);
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dest-remove {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.1s;
+  flex-shrink: 0;
+}
+.dest-remove:hover { color: var(--red); }
+
+.dest-add-row {
+  display: flex;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.dest-add-input {
+  flex: 1;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 6px 8px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.dest-add-input:focus { border-color: var(--accent); }
+
+.dest-add-btn {
+  background: var(--accent);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.dest-add-btn:hover { opacity: 0.8; }
+
+/* ── LOG ── */
+.log-wrap {
+  margin: 0 40px 32px;
+  border: 1px solid var(--border);
+  background: white;
+  overflow: hidden;
+}
+
+.log-hdr {
+  padding: 10px 16px;
+  background: var(--surface2);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  user-select: none;
+}
+
+.log-hdr-lbl {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+
+.log-body { max-height: 160px; overflow-y: auto; }
+
+.log-item {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.log-item:last-child { border-bottom: none; }
+
+.log-t {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.log-m {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.log-m .ref { color: var(--accent); font-family: var(--mono); font-size: 11px; }
+
+/* EMPTY / LOADING */
+.empty-state {
+  padding: 60px;
+  text-align: center;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 1px;
+}
+
+.spinner {
+  width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+}
+.spinner.dark {
+  border-color: rgba(0,0,0,0.15);
+  border-top-color: var(--accent);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* TOAST */
+.toast-wrap {
+  position: fixed;
+  bottom: 28px; right: 28px;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.toast {
+  background: var(--text);
+  color: white;
+  border-left: 3px solid var(--green);
+  padding: 12px 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 260px;
+  max-width: 380px;
+  animation: slideIn 0.25s ease;
+  font-size: 12px;
+  font-family: var(--sans);
+}
+.toast.error { border-left-color: var(--red); }
+.toast.info { border-left-color: var(--accent); }
+.toast.warn { border-left-color: var(--yellow); }
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(16px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* MODAL agregar NP */
+.modal-ov {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(26,23,20,0.6);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(3px);
+}
+.modal-ov.open { display: flex; }
+
+.modal {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 32px;
+  max-width: 480px;
+  width: 90%;
+  animation: modalIn 0.2s ease;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-title {
+  font-family: var(--display);
+  font-size: 17px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--text);
+}
+
+.form-group { margin-bottom: 14px; }
+
+.form-lbl {
+  display: block;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 5px;
+}
+
+.form-inp {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  padding: 8px 10px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.form-inp:focus { border-color: var(--accent); }
+
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.modal-actions {
+  display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px;
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 8px 18px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.btn-cancel:hover { border-color: var(--border-dark); color: var(--text); }
+
+.btn-confirm {
+  background: var(--text);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  padding: 8px 22px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+}
+.btn-confirm:hover { opacity: 0.8; }
+
+.error-banner {
+  background: var(--red-light);
+  border: 1px solid rgba(196,43,28,0.2);
+  color: var(--red);
+  padding: 12px 16px;
+  font-size: 12px;
+  font-family: var(--mono);
+  margin-bottom: 12px;
+  display: none;
+}
+.error-banner.show { display: block; }
+
+/* ── CHECKBOX ── */
+.cb-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cb {
+  width: 16px; height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+  flex-shrink: 0;
+}
+.np-row-wrap.selected { background: var(--accent-light) !important; border-left: 3px solid var(--accent); }
+
+/* ── BARRA GRUPAL ── */
+.group-bar {
+  display: none;
+  position: sticky;
+  bottom: 0;
+  left: 0; right: 0;
+  background: var(--text);
+  color: white;
+  padding: 12px 20px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  z-index: 50;
+  border-top: 2px solid var(--accent);
+  animation: slideUp 0.2s ease;
+}
+.group-bar.show { display: flex; }
+@keyframes slideUp {
+  from { opacity:0; transform:translateY(8px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+.group-bar-info {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: rgba(255,255,255,0.7);
+}
+.group-bar-info strong { color: white; font-size: 14px; }
+.group-bar-actions { display: flex; gap: 8px; }
+
+.btn-group-send {
+  background: var(--green);
+  border: none;
+  color: white;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 9px 20px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: opacity 0.15s;
+}
+.btn-group-send:hover { opacity: 0.85; }
+
+.btn-group-clear {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.3);
+  color: rgba(255,255,255,0.7);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 9px 16px;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.15s;
+}
+.btn-group-clear:hover { border-color: white; color: white; }
+
+/* ── MODAL GRUPAL ── */
+.modal-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 12px 0;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.modal-group-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  display: grid;
+  grid-template-columns: 70px 1fr 80px 50px;
+  gap: 8px;
+  align-items: center;
+}
+.mgi-np { font-family: var(--mono); font-size: 11px; color: var(--accent); font-weight: 500; }
+.mgi-det { font-size: 11px; color: var(--text); }
+.mgi-qty-wrap { display: flex; align-items: center; gap: 4px; }
+.mgi-qty {
+  width: 65px;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 6px;
+  outline: none;
+}
+.mgi-qty:focus { border-color: var(--accent); }
+.mgi-um { font-family: var(--mono); font-size: 10px; color: var(--text-muted); }
+
+.modal-mail-prev {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  padding: 12px 14px;
+  margin-top: 12px;
+}
+.modal-mail-subj {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--accent);
+  font-weight: 500;
+  margin-bottom: 6px;
+}
+.modal-mail-body {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+.modal-group-title-lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 4px;
+}
+.modal-note-input {
+  width: 100%;
+  background: white;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 12px;
+  padding: 7px 10px;
+  outline: none;
+  margin-top: 10px;
+}
+.modal-note-input:focus { border-color: var(--accent); }
+
+/* ── TABS ── */
+.tabs-nav {
+  background: var(--text);
+  display: flex;
+  padding: 0 40px;
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+}
+.tab-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.15s;
+}
+.tab-btn:hover { color: rgba(255,255,255,0.75); }
+.tab-btn.active { color: white; border-bottom-color: #7eb8ff; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── HISTORIAL ── */
+.hist-area { padding: 28px 40px 40px; }
+.hist-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
+.hist-title { font-family: var(--display); font-size: 20px; font-weight: 700; flex: 1; }
+.hist-filter-group { display: flex; align-items: center; gap: 8px; }
+.hist-filter-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; white-space: nowrap; }
+.hist-inp { background: white; border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 6px 10px; outline: none; }
+.hist-inp:focus { border-color: var(--accent); }
+.hist-sel { background: white; border: 1px solid var(--border); color: var(--text); font-family: var(--mono); font-size: 11px; padding: 6px 10px; outline: none; cursor: pointer; }
+.btn-hist-search { background: var(--text); border: none; color: white; font-family: var(--mono); font-size: 10px; font-weight: 600; padding: 7px 16px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: opacity 0.15s; }
+.btn-hist-search:hover { opacity: 0.8; }
+.hist-summary { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.hist-card { background: white; border: 1px solid var(--border); padding: 16px 20px; }
+.hist-card-val { font-family: var(--display); font-size: 32px; font-weight: 800; line-height: 1; margin-bottom: 4px; }
+.hist-card-val.ok { color: var(--green); }
+.hist-card-val.pend { color: var(--yellow); }
+.hist-card-val.pct { color: var(--accent); }
+.hist-card-val.total { color: var(--text); }
+.hist-card-lbl { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
+.hist-two-col { display: grid; grid-template-columns: 1fr 320px; gap: 16px; align-items: start; }
+.hist-section-title { font-family: var(--mono); font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 2px; padding-bottom: 8px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.causa-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+.causa-bar-row { display: flex; align-items: center; gap: 10px; }
+.causa-bar-lbl { font-size: 11px; color: var(--text); width: 200px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.causa-bar-track { flex: 1; background: var(--surface2); height: 18px; position: relative; overflow: hidden; }
+.causa-bar-fill { height: 100%; background: var(--accent); transition: width 0.4s ease; }
+.causa-bar-count { font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--text); width: 28px; text-align: right; flex-shrink: 0; }
+.hist-table { background: white; border: 1px solid var(--border); overflow: hidden; margin-top: 20px; }
+.hist-t-head { display: grid; grid-template-columns: 90px 80px 1fr 160px 100px 200px; padding: 8px 14px; background: var(--surface2); border-bottom: 1px solid var(--border); gap: 8px; }
+.hist-th { font-family: var(--mono); font-size: 9px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1.5px; }
+.hist-row { display: grid; grid-template-columns: 90px 80px 1fr 160px 100px 200px; padding: 10px 14px; border-bottom: 1px solid rgba(216,210,200,0.5); gap: 8px; align-items: center; }
+.hist-row:last-child { border-bottom: none; }
+.hist-row:hover { background: #faf9f7; }
+.hist-td { font-size: 11px; color: var(--text); }
+.hist-td.mono { font-family: var(--mono); font-size: 10px; }
+.hist-td.muted { color: var(--text-muted); font-size: 10px; }
+.hist-pill { display: inline-block; font-family: var(--mono); font-size: 9px; padding: 2px 8px; letter-spacing: 1px; text-transform: uppercase; }
+.hist-pill.aut { background: var(--green-light); color: var(--green); }
+.hist-pill.pend { background: var(--yellow-light); color: var(--yellow); }
+.hist-pill.justif { background: var(--accent-light); color: var(--accent); }
+
+/* MODAL JUSTIFICACIÓN */
+.justif-np-info { background: var(--bg); border: 1px solid var(--border); border-left: 3px solid var(--yellow); padding: 10px 14px; margin-bottom: 16px; }
+.justif-np-num { font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--accent); }
+.justif-np-det { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.justif-options { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.justif-opt { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: white; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; }
+.justif-opt:hover { border-color: var(--accent); background: var(--accent-light); }
+.justif-opt input[type=radio] { accent-color: var(--accent); flex-shrink: 0; }
+.justif-opt-lbl { font-size: 12px; color: var(--text); }
+.justif-otras { margin-top: 4px; display: none; }
+.justif-otras.show { display: block; }
+.justif-otros-inp { width: 100%; background: white; border: 1px solid var(--border); color: var(--text); font-family: var(--sans); font-size: 12px; padding: 8px 10px; outline: none; }
+.justif-otros-inp:focus { border-color: var(--accent); }
+.justif-progress { font-family: var(--mono); font-size: 10px; color: var(--text-muted); text-align: center; margin-bottom: 12px; }
+.status-pill.reprogramado { background: var(--orange-light); color: var(--orange); }
+.np-row-wrap.reprogramado { background: var(--orange-light); border-left: 3px solid var(--orange); opacity: 0.85; } border: 1px solid var(--border); color: var(--text-muted); font-family: var(--mono); font-size: 10px; padding: 6px 14px; cursor: pointer; letter-spacing: 1px; text-transform: uppercase; transition: all 0.15s; }
+.btn-export:hover { border-color: var(--border-dark); color: var(--text); }
+
+/* ── PLAN SEMANAL ── */
+.plan-semana-grid { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:28px; }
+.plan-dia-col { border:1px solid var(--border); background:white; overflow:hidden; }
+.plan-dia-col.hoy { border-color:var(--accent); border-width:2px; }
+.plan-dia-header { padding:10px 12px; background:var(--surface2); border-bottom:1px solid var(--border); display:flex; align-items:baseline; justify-content:space-between; }
+.plan-dia-col.hoy .plan-dia-header { background:var(--accent); }
+.plan-dia-nombre { font-family:var(--mono); font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:1px; color:var(--text); }
+.plan-dia-col.hoy .plan-dia-nombre { color:white; }
+.plan-dia-fecha { font-family:var(--mono); font-size:10px; color:var(--text-muted); }
+.plan-dia-col.hoy .plan-dia-fecha { color:rgba(255,255,255,0.7); }
+.plan-dia-body { padding:8px; display:flex; flex-direction:column; gap:6px; min-height:60px; }
+.plan-np-card { border-left:3px solid var(--border); padding:6px 8px; background:var(--bg); }
+.plan-np-card.autorizado { border-left-color:var(--green); background:var(--green-light); }
+.plan-np-card.pendiente { border-left-color:var(--yellow); }
+.plan-np-card.reprogramado { border-left-color:var(--orange); background:var(--orange-light); }
+.plan-np-num { font-family:var(--mono); font-size:10px; color:var(--accent); font-weight:600; }
+.plan-np-cliente { font-size:11px; font-weight:600; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.plan-np-detalle { font-size:10px; color:var(--text-muted); line-height:1.3; }
+.plan-np-cant { font-family:var(--mono); font-size:10px; color:var(--text); margin-top:2px; }
+.plan-np-status { display:inline-block; font-family:var(--mono); font-size:8px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:1px 5px; margin-top:2px; }
+.plan-np-status.autorizado { background:var(--green-light); color:var(--green); }
+.plan-np-status.pendiente { background:var(--yellow-light); color:var(--yellow); }
+.plan-np-status.reprogramado { background:var(--orange-light); color:var(--orange); }
+.plan-empty-dia { font-family:var(--mono); font-size:10px; color:var(--text-dim); text-align:center; padding:16px 8px; }
+.plan-seccion-titulo { font-family:var(--mono); font-size:10px; color:var(--text-dim); text-transform:uppercase; letter-spacing:2px; padding-bottom:8px; border-bottom:1px solid var(--border); margin:28px 0 12px; display:flex; align-items:center; justify-content:space-between; }
+.plan-mes-grupo { margin-bottom:20px; }
+.plan-mes-header { font-family:var(--display); font-size:15px; font-weight:700; color:var(--text); padding:8px 12px; background:var(--surface2); border:1px solid var(--border); border-bottom:none; display:flex; align-items:center; justify-content:space-between; }
+.plan-mes-count { font-family:var(--mono); font-size:10px; color:var(--text-muted); font-weight:400; }
+.plan-tabla { border:1px solid var(--border); background:white; }
+.plan-tabla-head { display:grid; grid-template-columns:70px 90px 1fr 190px 80px 50px 90px; padding:7px 12px; background:var(--surface2); border-bottom:1px solid var(--border); gap:8px; }
+.plan-th { font-family:var(--mono); font-size:9px; color:var(--text-dim); text-transform:uppercase; letter-spacing:1.5px; }
+.plan-fila { display:grid; grid-template-columns:70px 90px 1fr 190px 80px 50px 90px; padding:9px 12px; border-bottom:1px solid rgba(216,210,200,0.5); gap:8px; align-items:center; font-size:11px; }
+.plan-fila:last-child { border-bottom:none; }
+.plan-fila:hover { background:#faf9f7; }
+.plan-fila.autorizado { background:var(--green-light); }
+.plan-fila.reprogramado { background:var(--orange-light); opacity:0.8; }
+.plan-td { color:var(--text); }
+.plan-td.mono { font-family:var(--mono); font-size:10px; color:var(--accent); }
+.plan-td.muted { color:var(--text-muted); font-size:10px; }
+.plan-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:24px; }
+.plan-stat-card { background:white; border:1px solid var(--border); padding:14px 16px; }
+.plan-stat-val { font-family:var(--display); font-size:28px; font-weight:800; line-height:1; margin-bottom:4px; }
+.plan-stat-lbl { font-family:var(--mono); font-size:9px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; }
+.imp-inp { background:white; border:1px solid var(--border); color:var(--text); font-family:var(--mono); font-size:11px; padding:3px 5px; outline:none; width:100%; transition:border-color 0.15s; }
+.imp-inp:focus { border-color:var(--accent); }
+.imp-pv { display:flex; align-items:center; gap:2px; }
+.imp-pv-sep { font-family:var(--mono); font-size:11px; color:var(--text-dim); }
+.dias-badge { display:inline-block; font-family:var(--mono); font-size:10px; font-weight:600; padding:2px 7px; border-radius:2px; }
+.dias-badge.ok { background:var(--green-light); color:var(--green); }
+.dias-badge.warn { background:var(--yellow-light); color:var(--yellow); }
+.dias-badge.vencido { background:var(--red-light); color:var(--red); }
+.dias-badge.imputado { background:var(--accent-light); color:var(--accent); }
+.btn-imputar { background:var(--accent); border:none; color:white; font-family:var(--mono); font-size:9px; font-weight:600; padding:6px 8px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; transition:opacity 0.15s; width:100%; }
+.btn-imputar:hover { opacity:0.8; }
+.btn-imputar:disabled { background:var(--border); color:var(--text-dim); cursor:not-allowed; }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-brand">
+    <div class="brand-logo">CDS</div>
+    <div class="brand-title">Panel de Autorización de Carga</div>
+  </div>
+  <div class="header-right">
+    <div class="clock">
+      <div class="clock-time" id="clockTime">--:--:--</div>
+      <div class="clock-date" id="clockDate">---</div>
+    </div>
+    <button class="btn-reload" id="btnReload" onclick="loadFromSheets()">
+      <span id="reloadIcon">↺</span> Actualizar planilla
+    </button>
+    <button class="btn-autorizar" style="font-size:10px;padding:6px 14px;letter-spacing:1px;font-family:var(--mono);text-transform:uppercase;" onclick="openAddModal()">+ NP manual</button>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-nav">
+  <button class="tab-btn active" onclick="switchTab('panel',this)">▣ Panel del día</button>
+  <button class="tab-btn" onclick="switchTab('historial',this)">📋 Historial & Análisis</button>
+  <button class="tab-btn" id="tabImputBtn" onclick="switchTab('imputacion',this)">🧾 Imputación <span id="imputBadge" style="display:none;background:#c42b1c;color:white;font-size:9px;padding:1px 6px;border-radius:8px;margin-left:4px;"></span></button>
+  <button class="tab-btn" onclick="switchTab('plan',this)">📅 Plan Semanal</button>
+</div>
+
+<!-- STATS (solo en panel día) -->
+<div id="statsBar">
+<div class="stats">
+  <div class="stat">
+    <div class="stat-label">Total hoy</div>
+    <div class="stat-value" id="sTotal">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Pendientes</div>
+    <div class="stat-value pendiente" id="sPend">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Autorizados</div>
+    <div class="stat-value autorizado" id="sAut">0</div>
+  </div>
+  <div class="stat">
+    <div class="stat-label">Parciales</div>
+    <div class="stat-value parcial" id="sPar">0</div>
+  </div>
+</div>
+</div>
+
+<!-- TAB: PANEL DÍA -->
+<div class="tab-panel active" id="tab-panel">
+<div class="main">
+
+  <!-- TABLE AREA -->
+  <div class="table-area">
+    <div class="table-toolbar">
+      <div class="table-title">
+        NPs del día
+        <span class="sheet-badge" id="sheetBadge">Google Sheets</span>
+      </div>
+      <div class="filters">
+        <button class="filter-btn active" onclick="setFilter('todos',this)">Todos</button>
+        <button class="filter-btn" onclick="setFilter('pendiente',this)">Pendientes</button>
+        <button class="filter-btn" onclick="setFilter('autorizado',this)">Autorizados</button>
+        <button class="filter-btn" onclick="setFilter('parcial',this)">Parciales</button>
+      </div>
+    </div>
+
+    <div class="error-banner" id="errorBanner"></div>
+
+    <div class="table-wrap">
+      <div class="t-head" style="grid-template-columns: 36px 80px 1fr 180px 90px 60px 110px 130px;">
+        <div class="th"><input type="checkbox" class="cb" id="cbAll" onclick="toggleAll(this)" title="Seleccionar todos"></div>
+        <div class="th">N° NP</div>
+        <div class="th">Cliente</div>
+        <div class="th">Detalle</div>
+        <div class="th">Cant.</div>
+        <div class="th">UM</div>
+        <div class="th">Estado</div>
+        <div class="th">Acción</div>
+      </div>
+      <div id="npList">
+        <div class="empty-state">
+          <div class="spinner dark" style="margin:0 auto 12px;"></div>
+          Cargando planilla...
+        </div>
+      </div>
+      <!-- BARRA GRUPAL -->
+      <div class="group-bar" id="groupBar">
+        <div class="group-bar-info">
+          <strong id="gbCount">0</strong> ítems seleccionados para autorización grupal
+        </div>
+        <div class="group-bar-actions">
+          <button class="btn-group-clear" onclick="clearSelection()">✕ Limpiar</button>
+          <button class="btn-group-send" onclick="openGroupModal()">✉ Autorizar seleccionados</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- CONFIGURACIÓN -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Configuración</div>
+
+      <div>
+        <div class="sidebar-lbl">Remitente (tu mail)</div>
+        <input class="sidebar-input" id="cfgRemitente" type="email" value="paolavargas@cuencadelsur.com">
+      </div>
+
+      <div>
+        <div class="sidebar-lbl">Nombre en firma</div>
+        <input class="sidebar-input" id="cfgNombre" type="text" value="Paola Vargas">
+      </div>
+
+      <div>
+        <div class="sidebar-lbl">Cargo en firma</div>
+        <input class="sidebar-input" id="cfgCargo" type="text" value="Analista Facturación y Cobranzas">
+      </div>
+
+      <div>
+        <div class="sidebar-lbl">Teléfono</div>
+        <input class="sidebar-input" id="cfgTel" type="text" value="(261) 498-0407 / 1509">
+      </div>
+
+      <div>
+        <div class="sidebar-lbl">Empresa</div>
+        <input class="sidebar-input" id="cfgEmpresa" type="text" value="Cuenca del Sur">
+      </div>
+    </div>
+
+    <!-- FIRMA PREVIEW -->
+    <div class="sidebar-section">
+      <div class="sidebar-title" style="font-size:11px;">Vista previa firma</div>
+      <div class="firma-preview" id="firmaPreview">
+        <div class="firma-nombre" id="fpNombre">Paola Vargas</div>
+        <div class="firma-cargo" id="fpCargo">Analista Facturación y Cobranzas</div>
+        <div class="firma-dato"><span>✆</span> <span id="fpTel">(261) 498-0407 / 1509</span></div>
+        <div class="firma-dato"><span>@</span> <span id="fpMail">paolavargas@cuencadelsur.com</span></div>
+        <div class="firma-dato"><span>✦</span> <span id="fpEmp">Cuenca del Sur</span></div>
+      </div>
+    </div>
+
+    <!-- DESTINATARIOS -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Destinatarios <span style="font-family:var(--mono);font-size:10px;font-weight:400;color:var(--text-muted)" id="destCount">0</span></div>
+      <div class="dest-list" id="destList"></div>
+      <div class="dest-add-row">
+        <input class="dest-add-input" id="destNewEmail" type="email" placeholder="nuevo@cuencadelsur.com">
+        <button class="dest-add-btn" onclick="addDest()">+</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- LOG -->
+<div class="log-wrap">
+  <div class="log-hdr" onclick="toggleLog()">
+    <span class="log-hdr-lbl">Registro de autorizaciones del día</span>
+    <span id="logToggle">▼</span>
+  </div>
+  <div class="log-body" id="logBody">
+    <div style="padding:16px;font-family:var(--mono);font-size:10px;color:var(--text-dim);">Sin actividad aún.</div>
+  </div>
+</div>
+
+</div><!-- /tab-panel -->
+
+<!-- TAB: HISTORIAL -->
+<div class="tab-panel" id="tab-historial">
+  <div class="hist-area">
+    <div class="hist-toolbar">
+      <div class="hist-title">Historial & Análisis</div>
+      <div class="hist-filter-group">
+        <span class="hist-filter-lbl">Desde</span>
+        <input class="hist-inp" type="date" id="histDesde">
+        <span class="hist-filter-lbl">Hasta</span>
+        <input class="hist-inp" type="date" id="histHasta">
+        <select class="hist-sel" id="histGranul" onchange="applyHistFilter()">
+          <option value="dia">Por día</option>
+          <option value="mes">Por mes</option>
+          <option value="anio">Por año</option>
+        </select>
+        <button class="btn-hist-search" onclick="applyHistFilter()">Filtrar</button>
+        <button class="btn-export" onclick="exportCSV()">↓ CSV</button>
+      </div>
+    </div>
+
+    <!-- RESUMEN -->
+    <div class="hist-summary">
+      <div class="hist-card">
+        <div class="hist-card-val total" id="hTotal">—</div>
+        <div class="hist-card-lbl">NPs Programadas</div>
+      </div>
+      <div class="hist-card">
+        <div class="hist-card-val ok" id="hAut">—</div>
+        <div class="hist-card-lbl">Autorizadas</div>
+      </div>
+      <div class="hist-card">
+        <div class="hist-card-val pend" id="hPend">—</div>
+        <div class="hist-card-lbl">No salieron</div>
+      </div>
+      <div class="hist-card">
+        <div class="hist-card-val pct" id="hPct">—</div>
+        <div class="hist-card-lbl">% Cumplimiento</div>
+      </div>
+    </div>
+
+    <div class="hist-two-col">
+      <!-- TABLA -->
+      <div>
+        <div class="hist-section-title">Detalle de NPs</div>
+        <div class="hist-table">
+          <div class="hist-t-head">
+            <div class="hist-th">Fecha</div>
+            <div class="hist-th">NP</div>
+            <div class="hist-th">Cliente / Detalle</div>
+            <div class="hist-th">Producto</div>
+            <div class="hist-th">Estado</div>
+            <div class="hist-th">Causa (si pendiente)</div>
+          </div>
+          <div id="histRows"><div class="empty-state" style="padding:32px;">Seleccioná un rango y hacé click en Filtrar.</div></div>
+        </div>
+      </div>
+      <!-- GRÁFICO CAUSAS -->
+      <div>
+        <div class="hist-section-title">Causas de no salida</div>
+        <div class="causa-bar-wrap" id="causaChart">
+          <div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:20px 0;">Sin datos aún.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-historial -->
+
+<!-- TAB: IMPUTACIÓN -->
+<div class="tab-panel" id="tab-imputacion">
+  <div class="hist-area">
+    <div class="hist-toolbar">
+      <div class="hist-title">Imputación de Salidas</div>
+      <div class="hist-filter-group">
+        <div class="filters">
+          <button class="filter-btn active" id="fimputTodos" onclick="setImputFiltro('todos',this)">Todos</button>
+          <button class="filter-btn" id="fimputPend" onclick="setImputFiltro('pendiente',this)">Pendientes</button>
+          <button class="filter-btn" id="fimputSalteo" onclick="setImputFiltro('salteo',this)">⏸ Salteos</button>
+          <button class="filter-btn" id="fimputDone" onclick="setImputFiltro('imputado',this)">Imputados</button>
+        </div>
+        <span class="hist-filter-lbl" style="margin-left:8px;">PV Remito</span>
+        <input class="hist-inp" id="cfgPVRemito" type="text" value="00009" style="width:65px;" maxlength="5">
+        <span class="hist-filter-lbl">PV Factura</span>
+        <input class="hist-inp" id="cfgPVFactura" type="text" value="00005" style="width:65px;" maxlength="5">
+        <button class="btn-hist-search" onclick="renderImputacion(true)">↺ Actualizar</button>
+        <button class="btn-export" onclick="exportImputCSV()">↓ CSV</button>
+      </div>
+    </div>
+    <div class="hist-table">
+      <div class="hist-t-head" style="grid-template-columns:90px 80px 1fr 120px 55px 55px 140px 140px 90px 95px;">
+        <div class="hist-th">Fecha Aut.</div>
+        <div class="hist-th">NP</div>
+        <div class="hist-th">Cliente / Detalle</div>
+        <div class="hist-th">Cant / UM</div>
+        <div class="hist-th">Días</div>
+        <div class="hist-th">Est.</div>
+        <div class="hist-th">Remito (PV-N°)</div>
+        <div class="hist-th">Factura (PV-N°)</div>
+        <div class="hist-th">F. Imput.</div>
+        <div class="hist-th">Acción</div>
+      </div>
+      <div id="imputRows"><div class="empty-state" style="padding:32px;">Cargando...</div></div>
+    </div>
+  </div>
+</div><!-- /tab-imputacion -->
+
+<!-- TAB: PLAN SEMANAL -->
+<div class="tab-panel" id="tab-plan">
+  <div class="hist-area">
+    <div class="hist-toolbar">
+      <div class="hist-title">Plan Semanal
+        <span id="planSemanaLabel" style="font-family:var(--mono);font-size:12px;font-weight:400;color:var(--text-muted);margin-left:12px;"></span>
+      </div>
+      <div class="hist-filter-group">
+        <button class="btn-hist-search" onclick="loadPlanSemanal(true)">↺ Actualizar</button>
+      </div>
+    </div>
+
+    <!-- SEMANA EN CURSO -->
+    <div id="planSemanaContainer">
+      <div class="empty-state" style="padding:40px;">
+        <div class="spinner dark" style="margin:0 auto 12px;"></div>
+        Cargando plan semanal...
+      </div>
+    </div>
+  </div>
+</div><!-- /tab-plan -->
+
+<!-- MODAL SOLICITAR SALTEO (Paola) -->
+<div class="modal-ov" id="solicitudSalteoModal">
+  <div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--text-muted);">↷ Solicitar salteo de factura</div>
+    <div id="solSalteoInfo" style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--yellow);padding:10px 14px;margin-bottom:16px;">
+      <div id="solSalteoNPNum" style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);"></div>
+      <div id="solSalteoNPDet" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Remito (obligatorio)</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+      <input id="solSalteoPVR" type="text" maxlength="5" value="00009"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:60px;outline:none;">
+      <span style="font-family:var(--mono);color:var(--text-dim);">-</span>
+      <input id="solSalteoNRR" type="text" maxlength="8" placeholder="N° remito"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:110px;outline:none;">
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px;">Motivo</div>
+    <select id="solSalteoMotivo" style="width:100%;background:white;border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 8px;outline:none;margin-bottom:16px;">
+      <option value="Facturación fin de mes (acuerdo marco)">Facturación fin de mes (acuerdo marco)</option>
+      <option value="Cliente con facturación diferida">Cliente con facturación diferida</option>
+      <option value="Pendiente de datos de factura">Pendiente de datos de factura</option>
+      <option value="Otro motivo autorizado">Otro motivo autorizado</option>
+    </select>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('solicitudSalteoModal').classList.remove('open')">Cancelar</button>
+      <button class="btn-confirm" style="background:var(--yellow);color:#1a1714;" onclick="confirmarSolicitudSalteo()">Enviar solicitud</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AUTORIZAR SALTEO (Gonzalo, con PIN) -->
+<div class="modal-ov" id="autorizarSalteoModal">
+  <div class="modal" style="max-width:420px;" onclick="event.stopPropagation()">
+    <div class="modal-title" style="color:var(--accent);">🔐 Autorizar salteo</div>
+    <div id="autSalteoInfo" style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--accent);padding:10px 14px;margin-bottom:12px;">
+      <div id="autSalteoNPNum" style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);"></div>
+      <div id="autSalteoNPDet" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></div>
+      <div id="autSalteoRemito" style="font-family:var(--mono);font-size:11px;color:var(--text);margin-top:6px;"></div>
+      <div id="autSalteoMotivo" style="font-size:11px;color:var(--orange);margin-top:2px;"></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">Ingresá el código de autorización:</div>
+    <div style="display:flex;justify-content:center;margin-bottom:8px;">
+      <input id="autSalteoPin" type="password" maxlength="4" inputmode="numeric"
+        style="background:white;border:2px solid var(--border);color:var(--text);font-family:var(--mono);font-size:28px;font-weight:700;padding:10px 16px;width:120px;text-align:center;letter-spacing:8px;outline:none;"
+        placeholder="····" oninput="this.value=this.value.replace(/\D/g,'')"
+        onkeydown="if(event.key==='Enter'){ event.preventDefault(); confirmarAutorizarSalteo(); }">
+    </div>
+    <div id="autSalteoError" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);text-align:center;margin-bottom:8px;">Código incorrecto</div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;margin-top:8px;">Cantidad real entregada</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <input id="autSalteoCant" type="text" inputmode="decimal"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:14px;padding:6px 10px;width:100px;outline:none;">
+      <input id="autSalteoUM" type="text"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:60px;outline:none;" placeholder="UM">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('autorizarSalteoModal').classList.remove('open')">Cancelar</button>
+      <button class="btn-confirm" style="background:var(--red);" onclick="rechazarSalteo()">✕ Rechazar</button>
+      <button class="btn-confirm" onclick="event.preventDefault();event.stopPropagation();confirmarAutorizarSalteo()">✓ Autorizar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL IMPUTAR CON SIN NP -->
+<div class="modal-ov" id="modalImputar">
+  <div class="modal" style="max-width:500px;" onclick="event.stopPropagation()">
+    <div class="modal-title">Imputar salida</div>
+    <div id="modalImputInfo" style="background:var(--bg);border:1px solid var(--border);border-left:3px solid var(--green);padding:10px 14px;margin-bottom:16px;">
+      <div id="modalImputNP" style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);"></div>
+      <div id="modalImputDet" style="font-size:11px;color:var(--text-muted);margin-top:2px;"></div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Cantidad real entregada</div>
+    <div style="display:flex;gap:8px;margin-bottom:14px;">
+      <input id="modalImputCant" type="text" inputmode="decimal"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:14px;padding:6px 10px;width:90px;outline:none;">
+      <input id="modalImputUM" type="text"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:60px;outline:none;" placeholder="UM">
+    </div>
+
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Remito</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:14px;">
+      <input id="modalImputPVR" type="text" maxlength="5"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:60px;outline:none;">
+      <span style="font-family:var(--mono);color:var(--text-dim);">-</span>
+      <input id="modalImputNRR" type="text" maxlength="8" placeholder="N° remito"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:110px;outline:none;">
+    </div>
+
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;">Factura</div>
+    <div style="display:flex;align-items:center;gap:6px;margin-bottom:16px;">
+      <input id="modalImputPVF" type="text" maxlength="5"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:60px;outline:none;">
+      <span style="font-family:var(--mono);color:var(--text-dim);">-</span>
+      <input id="modalImputNRF" type="text" maxlength="8" placeholder="N° factura"
+        style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:13px;padding:6px 8px;width:110px;outline:none;">
+    </div>
+
+    <!-- SIN NP adicional -->
+    <div id="sinNPSection" style="display:none;background:var(--accent-light);border:1px solid rgba(26,79,214,0.2);padding:12px 14px;margin-bottom:14px;">
+      <div style="font-family:var(--mono);font-size:9px;color:var(--accent);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">+ Importe SIN NP adicional</div>
+      <div style="display:flex;gap:8px;margin-bottom:8px;align-items:center;">
+        <input id="sinNPCant" type="text" inputmode="decimal" placeholder="Cant"
+          style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;width:80px;outline:none;">
+        <input id="sinNPUM" type="text" placeholder="UM"
+          style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--mono);font-size:12px;padding:5px 8px;width:55px;outline:none;">
+        <input id="sinNPDetalle" type="text" placeholder="Descripción adicional (opcional)"
+          style="background:white;border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:12px;padding:5px 8px;flex:1;outline:none;">
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+      <button onclick="toggleSinNP()" id="btnSinNP"
+        style="background:transparent;border:1px solid var(--accent);color:var(--accent);font-family:var(--mono);font-size:10px;padding:6px 14px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;">
+        + Agregar SIN NP
+      </button>
+      <div class="modal-actions" style="margin:0;">
+        <button class="btn-cancel" onclick="document.getElementById('modalImputar').classList.remove('open')">Cancelar</button>
+        <button class="btn-confirm" onclick="confirmarImputar()">✓ Imputar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALERTA IMPUTACIONES -->
+<div class="modal-ov" id="imputAlertaModal">
+  <div class="modal" style="max-width:540px;">
+    <div class="modal-title" style="color:var(--red);">⚠ Imputaciones pendientes</div>
+    <div style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Las siguientes autorizaciones tienen <strong>48hs o más</strong> sin imputar o están próximas a vencer:</div>
+    <div id="imputAlertaList" style="max-height:280px;overflow-y:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:16px;"></div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="document.getElementById('imputAlertaModal').classList.remove('open')">Cerrar</button>
+      <button class="btn-confirm" onclick="document.getElementById('imputAlertaModal').classList.remove('open');switchTab('imputacion',document.getElementById('tabImputBtn'))">Ir a Imputación</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- MODAL REPROGRAMAR -->
+<div class="modal-ov" id="reprogModal">
+  <div class="modal" style="max-width:480px;">
+    <div class="modal-title" style="color:var(--orange);">⚡ Reprogramar NP</div>
+    <div class="justif-np-info">
+      <div class="justif-np-num" id="reprogNPNum"></div>
+      <div class="justif-np-det" id="reprogNPDet"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px;">Motivo de reprogramación</div>
+    <div class="justif-options" id="reprogOpts">
+      <label class="justif-opt"><input type="radio" name="reprogCausa" value="Cliente no se presenta a cargar"><span class="justif-opt-lbl">Cliente no se presenta a cargar</span></label>
+      <label class="justif-opt"><input type="radio" name="reprogCausa" value="Reprogramado por problemas en la carga"><span class="justif-opt-lbl">Reprogramado por problemas en la carga</span></label>
+      <label class="justif-opt"><input type="radio" name="reprogCausa" value="Reprogramado por problemas del Tte"><span class="justif-opt-lbl">Reprogramado por problemas del Tte</span></label>
+      <label class="justif-opt"><input type="radio" name="reprogCausa" value="Reprogramado por demoras de carga"><span class="justif-opt-lbl">Reprogramado por demoras de carga</span></label>
+      <label class="justif-opt" onclick="toggleReprogOtras()"><input type="radio" name="reprogCausa" value="otras"><span class="justif-opt-lbl">Otras causas: aclarar</span></label>
+    </div>
+    <div class="justif-otras" id="reprogOtrasDiv">
+      <input class="justif-otros-inp" id="reprogOtrasText" placeholder="Describí brevemente el motivo...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeReprogModal()">Cancelar</button>
+      <button class="btn-confirm" style="background:var(--orange);" onclick="saveReprog()">Guardar reprogramación</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL JUSTIFICACIÓN PENDIENTES -->
+<div class="modal-ov" id="justifModal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title" style="color:var(--yellow);">⚠ NPs pendientes del día anterior</div>
+    <div class="justif-progress" id="justifProgress"></div>
+    <div class="justif-np-info">
+      <div class="justif-np-num" id="justifNPNum"></div>
+      <div class="justif-np-det" id="justifNPDet"></div>
+    </div>
+    <div class="justif-options" id="justifOpts">
+      <label class="justif-opt">
+        <input type="radio" name="justifCausa" value="Cliente no se presenta a cargar">
+        <span class="justif-opt-lbl">Cliente no se presenta a cargar</span>
+      </label>
+      <label class="justif-opt">
+        <input type="radio" name="justifCausa" value="Reprogramado por problemas en la carga">
+        <span class="justif-opt-lbl">Reprogramado por problemas en la carga</span>
+      </label>
+      <label class="justif-opt">
+        <input type="radio" name="justifCausa" value="Reprogramado por problemas del Tte">
+        <span class="justif-opt-lbl">Reprogramado por problemas del Tte</span>
+      </label>
+      <label class="justif-opt">
+        <input type="radio" name="justifCausa" value="Reprogramado por demoras de carga">
+        <span class="justif-opt-lbl">Reprogramado por demoras de carga</span>
+      </label>
+      <label class="justif-opt" onclick="toggleOtras()">
+        <input type="radio" name="justifCausa" value="otras">
+        <span class="justif-opt-lbl">Otras causas: aclarar</span>
+      </label>
+    </div>
+    <div class="justif-otras" id="justifOtrasDiv">
+      <input class="justif-otros-inp" id="justifOtrasText" placeholder="Describí brevemente el motivo...">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-confirm" onclick="saveJustificacion()">Guardar y continuar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL GRUPAL -->
+<div class="modal-ov" id="groupModal">
+  <div class="modal" style="max-width:580px;">
+    <div class="modal-title">Autorización grupal — <span id="gmCount">0</span> ítems</div>
+    <div class="modal-group-title-lbl">Ítems a autorizar (podés editar cantidades)</div>
+    <div class="modal-group-items" id="gmItems"></div>
+    <div class="modal-group-title-lbl" style="margin-top:12px;">Observación adicional (opcional)</div>
+    <input class="modal-note-input" id="gmNota" placeholder="ej: Fletero Juan Pérez — Remito n° 001234">
+    <div class="modal-mail-prev">
+      <div class="modal-mail-subj" id="gmSubj"></div>
+      <div class="modal-mail-body" id="gmBody"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeGroupModal()">Cancelar</button>
+      <button class="btn-confirm" id="btnGmSend" onclick="sendGroupAutorizacion()">✉ Enviar autorización</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NP MANUAL -->
+<div class="modal-ov" id="addModal">
+  <div class="modal">
+    <div class="modal-title">Agregar NP manual</div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-lbl">N° NP</label>
+        <input class="form-inp" id="mNP" placeholder="5159">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">Fecha entrega</label>
+        <input class="form-inp" id="mFecha" type="date">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-lbl">Cliente</label>
+      <input class="form-inp" id="mCliente" placeholder="Razón social">
+    </div>
+    <div class="form-group">
+      <label class="form-lbl">Detalle del producto</label>
+      <input class="form-inp" id="mDetalle" placeholder="CCC 8&quot;DN esp 6,35mm...">
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-lbl">Cantidad</label>
+        <input class="form-inp" id="mCant" type="number" placeholder="12">
+      </div>
+      <div class="form-group">
+        <label class="form-lbl">UM</label>
+        <input class="form-inp" id="mUM" placeholder="mts / unid / kg">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeAddModal()">Cancelar</button>
+      <button class="btn-confirm" onclick="addNPManual()">Agregar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const SHEET_ID   = '1Z6PSsKjYca1386zi5RkMqfdE2g2pEJPkeZdDhnvJdcQ';
+const API_KEY    = 'AIzaSyBkQBvrcGH-lFTfZx9gxNVhSbZAjFQaLVM';
+const RANGE      = 'A:AB';
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCCu6wh-eBdrLszpEyMMAyoL4i3C8nmpSeivKMguAdP2AbCBbUK7SAO19DgG1w0KEM/exec';
+
+// ── ESCRITURA EN SHEETS VÍA APPS SCRIPT ──────────────────────────────────────
+async function registrarEnSheets(np) {
+  const fecha = todayFormatted();
+  const estado = np.estado === 'autorizado'    ? 'Autorizado'
+               : np.estado === 'reprogramado'  ? 'Reprogramado'
+               : np.estado === 'parcial'        ? 'Parcial'
+               : 'Pendiente';
+  const params = new URLSearchParams({
+    fecha,
+    np:       np.np,
+    cliente:  np.cliente,
+    detalle:  np.detalle,
+    cant:     np.cantAutorizar,
+    um:       np.um,
+    estado,
+    causa:    np.causa || '',
+    horaAut:  np.horaAut || ''
+  });
+  try {
+    await fetch(`${APPS_SCRIPT_URL}?${params.toString()}`, {
+      method: 'POST',
+      mode: 'no-cors'
+    });
+  } catch(err) {
+    console.warn('Error al registrar en Sheets:', err);
+  }
+}
+
+// ── RESTAURAR ESTADO DESDE SHEETS ────────────────────────────────────────────
+async function restaurarEstadoDesdeSheets() {
+  const hoy = todayFormatted(); // DD/MM/YYYY
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?hoja=REGISTRO_CARGAS`);
+    const json = await res.json();
+    if (!json.ok || !json.data) return;
+
+    // Filtrar registros de hoy con comparación flexible de fecha
+    const registrosHoy = json.data.filter(r => {
+      const fechaRaw = String(r.fecha||'');
+      const fechaNorm = normalizarFecha(fechaRaw);
+      if (fechaNorm === hoy) return true;
+      try {
+        const d = new Date(fechaRaw);
+        if (!isNaN(d.getTime())) {
+          const p = x => String(x).padStart(2,'0');
+          return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}` === hoy;
+        }
+      } catch(_) {}
+      return false;
+    });
+
+    registrosHoy.forEach(r => {
+      // Buscar por lineaId primero (maneja múltiples líneas del mismo NP)
+      // lineaid viene como "5176_125" etc
+      let target = r.lineaid ? nps.find(n => n.lineaId === String(r.lineaid)) : null;
+      // Fallback: buscar pendiente con ese NP
+      if (!target) target = nps.find(n => String(n.np) === String(r.np) && n.estado === 'pendiente');
+      if (!target) return;
+
+      target.estado = String(r.estado||'').toLowerCase() === 'autorizado'   ? 'autorizado'
+                    : String(r.estado||'').toLowerCase() === 'reprogramado' ? 'reprogramado'
+                    : String(r.estado||'').toLowerCase() === 'parcial'      ? 'parcial'
+                    : 'pendiente';
+      target.causa = r.causa || null;
+      target.cantAutorizar = parsearCant(r.cant) || target.cantOriginal;
+      if (target.estado !== 'pendiente') target.horaAut = r.horaaut || r.hora_aut || null;
+    });
+  } catch(err) {
+    console.warn('No se pudo restaurar estado desde Sheets:', err);
+  }
+}
+async function cargarHistorialSheets() {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?hoja=REGISTRO_CARGAS`);
+    const json = await res.json();
+    return json.ok ? json.data : [];
+  } catch(err) {
+    console.warn('Error al leer historial:', err);
+    return [];
+  }
+}
+
+// Destinatarios fijos iniciales
+let destinatarios = [
+  'ignaciomaratta@cuencadelsur.com',
+  'deposito@cuencadelsur.com',
+  'vivianazambrano@cuencadelsur.com',
+  'gonzalosalcedo@cuencadelsur.com',
+  'logistica@cuencadelsur.com',
+  'agustinamaestri@cuencadelsur.com',
+  'omaraballay@cuencadelsur.com',
+  'elenacolque@cuencadelsur.com',
+  'federicobalducci@cuencadelsur.com',
+  'porteria@cuencadelsur.com',
+  'diegopaez@cuencadelsur.com'
+];
+
+let nps = [];
+let filtro = 'todos';
+let expandId = null;
+let logEntries = [];
+let nextId = 1000;
+
+// ── HELPER: parsear cantidad aceptando punto y coma ──────────────────────────
+function parsearCant(val) {
+  if (!val) return 0;
+  return parseFloat(String(val).trim().replace(',','.')) || 0;
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function tick() {
+  const n = new Date();
+  const p = x => String(x).padStart(2,'0');
+  document.getElementById('clockTime').textContent = `${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+  const dias = ['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+  const meses = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];
+  document.getElementById('clockDate').textContent = `${dias[n.getDay()]} ${p(n.getDate())} ${meses[n.getMonth()]} ${n.getFullYear()}`;
+}
+setInterval(tick, 1000); tick();
+
+// ── FIRMA LIVE ────────────────────────────────────────────────────────────────
+function bindFirma() {
+  const fields = [
+    ['cfgNombre','fpNombre'],['cfgCargo','fpCargo'],
+    ['cfgTel','fpTel'],['cfgRemitente','fpMail'],['cfgEmpresa','fpEmp']
+  ];
+  fields.forEach(([inp,out]) => {
+    document.getElementById(inp).addEventListener('input', () => {
+      document.getElementById(out).textContent = document.getElementById(inp).value;
+      refreshMailPreviews();
+    });
+  });
+}
+
+// ── DESTINATARIOS ─────────────────────────────────────────────────────────────
+function renderDests() {
+  const list = document.getElementById('destList');
+  document.getElementById('destCount').textContent = destinatarios.length;
+  list.innerHTML = destinatarios.map((e,i) => `
+    <div class="dest-item">
+      <span class="dest-email" title="${e}">${e}</span>
+      <button class="dest-remove" onclick="removeDest(${i})" title="Quitar">×</button>
+    </div>
+  `).join('');
+}
+
+function removeDest(i) {
+  destinatarios.splice(i,1);
+  renderDests();
+  toast(`Destinatario eliminado`, 'warn');
+}
+
+function addDest() {
+  const inp = document.getElementById('destNewEmail');
+  const email = inp.value.trim().toLowerCase();
+  if (!email || !email.includes('@')) { toast('Email inválido','error'); return; }
+  if (destinatarios.includes(email)) { toast('Ya está en la lista','warn'); return; }
+  destinatarios.push(email);
+  inp.value = '';
+  renderDests();
+  toast(`${email} agregado`, 'success');
+}
+
+document.getElementById('destNewEmail').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addDest();
+});
+
+// ── GOOGLE SHEETS ─────────────────────────────────────────────────────────────
+async function loadFromSheets() {
+  const btn = document.getElementById('btnReload');
+  const icon = document.getElementById('reloadIcon');
+  btn.classList.add('loading');
+  icon.innerHTML = '<span class="spinner"></span>';
+
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${RANGE}?key=${API_KEY}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+    const data = await res.json();
+    const rows = data.values || [];
+    if (rows.length < 2) { showError('La planilla está vacía o no tiene datos.'); return; }
+
+    hideError();
+    parseSheetData(rows);
+    restaurarEstadoDia(); // localStorage como fallback rápido
+    await restaurarEstadoDesdeSheets(); // Sheets como fuente de verdad compartida
+    renderList();
+    updateStats();
+    document.getElementById('sheetBadge').textContent = '✓ Sheets actualizado';
+    toast('Planilla cargada correctamente', 'success');
+  } catch(err) {
+    console.error(err);
+    showError(`Error al leer la planilla: ${err.message}. Verificá que la planilla sea pública (Compartir → Cualquiera con el enlace → Lector).`);
+    toast('Error al cargar la planilla', 'error');
+  } finally {
+    btn.classList.remove('loading');
+    icon.textContent = '↺';
+  }
+}
+
+function parseSheetData(rows) {
+  // ── Buscar la fila de encabezados (puede estar en fila 1, 2, 3 o 4) ──
+  // La fila de headers es la primera que contenga "CLIENTE" o "N° NP" o "CANT"
+  let headerRowIdx = -1;
+  for (let i = 0; i < Math.min(rows.length, 8); i++) {
+    const joined = (rows[i] || []).join('|').toLowerCase();
+    if (joined.includes('cliente') && (joined.includes('cant') || joined.includes('detalle') || joined.includes('n°'))) {
+      headerRowIdx = i;
+      break;
+    }
+  }
+  if (headerRowIdx < 0) {
+    showError('No se pudo encontrar la fila de encabezados. Verificá que la planilla tenga columnas: N° NP, Cliente, Detalle, Cant, UM, Fecha Entrega.');
+    return;
+  }
+
+  const headers = rows[headerRowIdx].map(h => (h || '').toString().trim().toLowerCase()
+    .replace(/\n/g,' ').replace(/\s+/g,' '));
+
+  console.log('Headers fila', headerRowIdx + 1, ':', headers);
+
+  const col = name => {
+    const variants = {
+      'n° np':   ['n° np','nº np','n.° np','nro np','n°np','nro. np','numero np','# np','np n°','n° de np'],
+      'cliente': ['cliente','razón social','razon social','nombre cliente'],
+      'detalle': ['detalle','producto','descripcion','descripción','material','item'],
+      'cant':    ['cant','cantidad','qty','cant.'],
+      'um':      ['um','u.m.','unidad','unidad de medida','u/m'],
+    };
+    const list = variants[name] || [name];
+    for (const v of list) {
+      const idx = headers.findIndex(h => h === v || h.includes(v) || v.includes(h));
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  };
+
+  const iNP   = col('n° np');
+  const iCli  = col('cliente');
+  const iDet  = col('detalle');
+  const iCant = col('cant');
+  const iUM   = col('um');
+
+  // Buscar columna AB (índice 27) como FECHA ENTREGA
+  // No buscar por nombre porque hay otras columnas con "fecha" que confunden
+  // Usamos el último índice del header que tenga "fecha entrega" exacto, o 27 como fijo
+  let iFecha = -1;
+  for (let hi = headers.length - 1; hi >= 0; hi--) {
+    if (headers[hi] === 'fecha entrega' || headers[hi] === 'fecha de entrega') {
+      iFecha = hi;
+      break;
+    }
+  }
+  // Si no encontró match exacto, usar índice 27 (columna AB)
+  if (iFecha < 0) iFecha = 27;
+
+  console.log('Columnas → NP:', iNP, 'Cliente:', iCli, 'Detalle:', iDet, 'Cant:', iCant, 'UM:', iUM, 'Fecha:', iFecha);
+
+  const todayStr = todayFormatted();
+  const nuevos = [];
+
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    if (!r || r.length === 0) continue;
+
+    const np  = iNP  >= 0 ? (r[iNP]  || '').toString().trim() : '';
+    const cli = iCli >= 0 ? (r[iCli] || '').toString().trim() : '';
+    const det = iDet >= 0 ? (r[iDet] || '').toString().trim() : '';
+    const cantRaw = iCant >= 0 ? (r[iCant] || '0').toString().replace(/\./g,'').replace(',','.') : '0';
+    const cant = parseFloat(cantRaw) || 0;
+    const um  = iUM  >= 0 ? (r[iUM]  || '').toString().trim() : '';
+    // Si la fila es más corta que el índice de fecha → celda vacía
+    const fecha = (r.length > iFecha) ? (r[iFecha] || '').toString().trim() : '';
+
+    if (!np && !cli) continue;
+
+    const fechaNorm = normalizarFecha(fecha);
+    console.log(`Fila ${i+1} NP=${np} fecha raw="${fecha}" → norm="${fechaNorm}" hoy="${todayStr}" match=${fechaNorm===todayStr}`);
+    if (fechaNorm !== todayStr) continue;
+
+    const existing = nps.find(n => n.np === np && n.rowIndex === i && n.source === 'sheet');
+    if (existing) {
+      existing.cliente = cli; existing.detalle = det;
+      existing.cantOriginal = cant;
+      if (existing.estado === 'pendiente') existing.cantAutorizar = cant;
+      existing.um = um;
+      nuevos.push(existing);
+    } else {
+      nuevos.push({
+        id: nextId++,
+        lineaId: `${np}_${i}`,
+        rowIndex: i,
+        np, cliente: cli, detalle: det,
+        cantOriginal: cant, cantAutorizar: cant,
+        um, fecha, estado: 'pendiente', horaAut: null, source: 'sheet'
+      });
+    }
+  }
+
+  const manuales = nps.filter(n => n.source === 'manual');
+  nps = [...nuevos, ...manuales];
+
+  if (nps.length === 0) {
+    showError(`No se encontraron NPs para hoy (${todayStr}). Columna fecha en índice ${iFecha}. Abrí F12 → Console para ver el detalle.`);
+  }
+
+  renderList();
+  updateStats();
+}
+
+function todayFormatted() {
+  const n = new Date();
+  const p = x => String(x).padStart(2,'0');
+  return `${p(n.getDate())}/${p(n.getMonth()+1)}/${n.getFullYear()}`;
+}
+
+function normalizarFecha(f) {
+  if (!f) return null;
+  f = f.toString().trim();
+  const p = x => String(x).padStart(2,'0');
+  const anioHoy = new Date().getFullYear();
+
+  // DD/MM/YYYY
+  let m = f.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${p(m[1])}/${p(m[2])}/${m[3]}`;
+
+  // DD/MM/YY
+  m = f.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2})$/);
+  if (m) return `${p(m[1])}/${p(m[2])}/20${m[3]}`;
+
+  // DD/MM sin año → asumir año actual
+  m = f.match(/^(\d{1,2})[\/\-](\d{1,2})$/);
+  if (m) {
+    const dia = parseInt(m[1]), mes = parseInt(m[2]);
+    if (dia >= 1 && dia <= 31 && mes >= 1 && mes <= 12)
+      return `${p(dia)}/${p(mes)}/${anioHoy}`;
+  }
+
+  // YYYY-MM-DD
+  m = f.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (m) return `${m[3]}/${m[2]}/${m[1]}`;
+
+  // Serial Excel (Google Sheets envía las celdas con formato fecha como número)
+  // Ej: 46776 → 15/05/2026
+  const serial = parseFloat(f);
+  if (!isNaN(serial) && serial > 40000) {
+    const d = new Date((serial - 25569) * 86400 * 1000);
+    return `${p(d.getUTCDate())}/${p(d.getUTCMonth()+1)}/${d.getUTCFullYear()}`;
+  }
+
+  // Formato texto español: "viernes, 15 de mayo" / "15 de mayo" / "15 de mayo de 2026"
+  const meses = {
+    'enero':1,'febrero':2,'marzo':3,'abril':4,'mayo':5,'junio':6,
+    'julio':7,'agosto':8,'septiembre':9,'octubre':10,'noviembre':11,'diciembre':12
+  };
+  const fLower = f.toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[,\.]/g,' ').replace(/\s+/g,' ').trim();
+
+  m = fLower.match(/(\d{1,2})\s+de\s+([a-z]+)(?:\s+de\s+(\d{4}))?/);
+  if (m) {
+    const dia = parseInt(m[1]), mes = meses[m[2]], anio = m[3] ? parseInt(m[3]) : anioHoy;
+    if (mes) return `${p(dia)}/${p(mes)}/${anio}`;
+  }
+
+  // Nada reconocido (códigos tipo S4FEB, *MAY26, S1MAR, etc.)
+  return null;
+}
+
+// ── MAIL ──────────────────────────────────────────────────────────────────────
+function getMailSubject(np) {
+  return `AUTORIZACIÓN DE CARGA NP ${np.np} // ${np.cliente.toUpperCase()}`;
+}
+
+function getMailBody(np) {
+  const firma = buildFirmaText();
+  return `Estimados, buen día.
+
+El cliente ingresa a cargar:
+
+${np.cantAutorizar} ${np.um}  ${np.detalle}
+
+Quedo a disposición ante cualquier consulta.
+Saludos cordiales.
+
+${firma}`;
+}
+
+function buildFirmaText() {
+  const n = v => document.getElementById(v).value.trim();
+  return `${n('cfgNombre')}
+${n('cfgCargo')}
+${n('cfgTel')}
+${n('cfgRemitente')}
+${n('cfgEmpresa')}`;
+}
+
+function getMailHtml(np) {
+  const n = v => document.getElementById(v).value.trim();
+  return `
+<div style="font-family:Arial,sans-serif;font-size:13px;color:#1a1714;line-height:1.6;">
+  <p>Estimados, buen día.</p>
+  <p>El cliente ingresa a cargar:</p>
+  <p style="margin:16px 0;padding:12px 16px;background:#f5f2ed;border-left:3px solid #1a4fd6;font-weight:600;">
+    ${np.cantAutorizar} ${np.um} &nbsp; ${np.detalle}
+  </p>
+  <p>Quedo a disposición ante cualquier consulta.<br>Saludos cordiales.</p>
+  <hr style="margin:20px 0;border:none;border-top:1px solid #d8d2c8;">
+  <table style="font-size:12px;color:#7a7268;">
+    <tr><td colspan="2" style="font-size:14px;font-weight:700;color:#1a1714;padding-bottom:2px;">${n('cfgNombre')}</td></tr>
+    <tr><td colspan="2" style="color:#7a7268;padding-bottom:8px;">${n('cfgCargo')}</td></tr>
+    <tr><td style="padding-right:8px;">✆</td><td>${n('cfgTel')}</td></tr>
+    <tr><td>@</td><td>${n('cfgRemitente')}</td></tr>
+    <tr><td>✦</td><td>${n('cfgEmpresa')}</td></tr>
+  </table>
+</div>`;
+}
+
+// ── SEND: ABRE GMAIL DIRECTAMENTE ────────────────────────────────────────────
+function abrirGmail(subject, body) {
+  const to = destinatarios.join(',');
+  const url = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(to)}&su=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(url, '_blank');
+}
+
+function sendAutorizacion(id) {
+  const np = nps.find(n => n.id === id);
+  if (!np) return;
+  if (destinatarios.length === 0) { toast('Agregá al menos un destinatario','error'); return; }
+
+  // Bloqueo si hay imputaciones vencidas
+  if (hayBloqueoImputacion()) {
+    toast('⛔ Tenés imputaciones con +4 días pendientes. Imputá antes de autorizar.','error');
+    document.getElementById('imputAlertaModal').classList.add('open');
+    return;
+  }
+
+  const nota = document.getElementById(`nota-${id}`)?.value?.trim() || '';
+  const subject = getMailSubject(np);
+  const body = getMailBody(np, nota);
+
+  abrirGmail(subject, body);
+
+  const now = new Date();
+  const p = x => String(x).padStart(2,'0');
+  np.estado = 'autorizado';
+  np.horaAut = `${p(now.getHours())}:${p(now.getMinutes())}`;
+
+  addLog(np, `✓ NP-${np.np} autorizada — ${np.cantAutorizar} ${np.um} ${np.detalle}`);
+  toast(`Gmail abierto para NP-${np.np} · ${np.cliente}`, 'success');
+  saveEstadoDia();
+  cerrarDia(isoHoy(), nps);
+  registrarEnSheets(np);
+  registrarImputacionPendiente(np);
+
+  expandId = null;
+  renderList();
+  updateStats();
+}
+
+// ── REPROGRAMAR ───────────────────────────────────────────────────────────────
+let reprogNPId = null;
+
+function openReprogModal(id) {
+  const np = nps.find(n => n.id === id);
+  if (!np) return;
+  reprogNPId = id;
+  document.getElementById('reprogNPNum').textContent = `NP-${np.np} · ${np.cliente}`;
+  document.getElementById('reprogNPDet').textContent = `${np.cantAutorizar} ${np.um} — ${np.detalle}`;
+  document.querySelectorAll('input[name=reprogCausa]').forEach(r => r.checked = false);
+  document.getElementById('reprogOtrasDiv').classList.remove('show');
+  document.getElementById('reprogOtrasText').value = '';
+  document.getElementById('reprogModal').classList.add('open');
+}
+
+function closeReprogModal() {
+  document.getElementById('reprogModal').classList.remove('open');
+  reprogNPId = null;
+}
+
+function toggleReprogOtras() {
+  setTimeout(() => {
+    const sel = document.querySelector('input[name=reprogCausa]:checked');
+    document.getElementById('reprogOtrasDiv').classList.toggle('show', sel && sel.value === 'otras');
+  }, 50);
+}
+
+function saveReprog() {
+  const sel = document.querySelector('input[name=reprogCausa]:checked');
+  if (!sel) { toast('Seleccioná un motivo', 'warn'); return; }
+  let causa = sel.value;
+  if (causa === 'otras') {
+    const txt = document.getElementById('reprogOtrasText').value.trim();
+    if (!txt) { toast('Describí el motivo', 'warn'); return; }
+    causa = `Otras: ${txt}`;
+  }
+  const np = nps.find(n => n.id === reprogNPId);
+  if (!np) return;
+  np.estado = 'reprogramado';
+  np.causa = causa;
+  const now = new Date();
+  const p = x => String(x).padStart(2,'0');
+  np.horaAut = `${p(now.getHours())}:${p(now.getMinutes())}`;
+  saveEstadoDia();
+  cerrarDia(isoHoy(), nps);
+  registrarEnSheets(np);
+  addLog(np, `⚡ NP-${np.np} reprogramada — ${causa}`);
+  toast(`NP-${np.np} marcada como reprogramada`, 'warn');
+  closeReprogModal();
+  expandId = null;
+  renderList();
+  updateStats();
+}
+
+document.getElementById('reprogModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeReprogModal(); });
+let seleccionados = new Set(); // ids seleccionados
+
+function toggleSelect(id, checked) {
+  const np = nps.find(n => n.id === id);
+  if (!np || np.estado === 'autorizado') return;
+  if (checked) seleccionados.add(id);
+  else seleccionados.delete(id);
+  updateGroupBar();
+  // actualizar clase visual sin re-render completo
+  const card = document.getElementById(`card-${id}`);
+  if (card) {
+    card.classList.toggle('selected', checked);
+  }
+}
+
+function toggleAll(cbEl) {
+  const data = filtro === 'todos' ? nps : nps.filter(n => n.estado === filtro);
+  const pendientes = data.filter(n => n.estado !== 'autorizado');
+  if (cbEl.checked) pendientes.forEach(n => seleccionados.add(n.id));
+  else seleccionados.clear();
+  updateGroupBar();
+  renderList();
+}
+
+function clearSelection() {
+  seleccionados.clear();
+  updateGroupBar();
+  renderList();
+}
+
+function updateGroupBar() {
+  const bar = document.getElementById('groupBar');
+  const count = seleccionados.size;
+  document.getElementById('gbCount').textContent = count;
+  bar.classList.toggle('show', count > 0);
+}
+
+// ── MODAL GRUPAL ──────────────────────────────────────────────────────────────
+function buildGroupSubject(items) {
+  const npsUnicos = [...new Set(items.map(n => n.np))].join(' // ');
+  const clientesUnicos = [...new Set(items.map(n => n.cliente))];
+  // Si todos son del mismo cliente, usar ese cliente; si no, listarlos
+  const cliente = clientesUnicos.length === 1
+    ? clientesUnicos[0].toUpperCase()
+    : clientesUnicos.map(c => c.toUpperCase()).join(' · ');
+  return `AUTORIZACIÓN DE CARGA NP ${npsUnicos} // ${cliente}`;
+}
+
+function buildGroupBody(items, nota) {
+  const firma = buildFirmaText();
+  // En el cuerpo solo figura cant, um y detalle — sin cliente (ya está en el asunto)
+  const itemLines = items.map(n =>
+    `• ${n.cantAutorizar} ${n.um}  ${n.detalle}  [NP-${n.np}]`
+  ).join('\n');
+  const notaBlock = nota ? `\nObservación: ${nota}\n` : '';
+  return `Estimados, buen día.
+
+El cliente ingresa a cargar:
+
+${itemLines}
+${notaBlock}
+Quedo a disposición ante cualquier consulta.
+Saludos cordiales.
+
+${firma}`;
+}
+
+function buildGroupHtml(items, nota) {
+  const n = v => document.getElementById(v).value.trim();
+  const rows = items.map(np => `
+    <tr>
+      <td style="padding:6px 8px;font-weight:600;">${np.cantAutorizar} ${np.um}</td>
+      <td style="padding:6px 8px;">${np.detalle}</td>
+      <td style="padding:6px 8px;font-family:monospace;font-size:11px;color:#1a4fd6;">NP-${np.np}</td>
+      <td style="padding:6px 8px;color:#7a7268;font-size:11px;">${np.cliente}</td>
+    </tr>`).join('');
+  const notaBlock = nota ? `<p style="margin-top:12px;font-style:italic;color:#7a7268;">Observación: ${nota}</p>` : '';
+  return `
+<div style="font-family:Arial,sans-serif;font-size:13px;color:#1a1714;line-height:1.6;">
+  <p>Estimados, buen día.</p>
+  <p>El cliente ingresa a cargar:</p>
+  <table style="width:100%;border-collapse:collapse;margin:12px 0;background:#f5f2ed;">
+    <thead><tr style="border-bottom:2px solid #1a4fd6;">
+      <th style="padding:6px 8px;text-align:left;font-size:11px;color:#7a7268;">CANT.</th>
+      <th style="padding:6px 8px;text-align:left;font-size:11px;color:#7a7268;">DETALLE</th>
+      <th style="padding:6px 8px;text-align:left;font-size:11px;color:#7a7268;">NP</th>
+      <th style="padding:6px 8px;text-align:left;font-size:11px;color:#7a7268;">CLIENTE</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  ${notaBlock}
+  <p>Quedo a disposición ante cualquier consulta.<br>Saludos cordiales.</p>
+  <hr style="margin:20px 0;border:none;border-top:1px solid #d8d2c8;">
+  <table style="font-size:12px;color:#7a7268;">
+    <tr><td colspan="2" style="font-size:14px;font-weight:700;color:#1a1714;padding-bottom:2px;">${n('cfgNombre')}</td></tr>
+    <tr><td colspan="2" style="color:#7a7268;padding-bottom:8px;">${n('cfgCargo')}</td></tr>
+    <tr><td style="padding-right:8px;">✆</td><td>${n('cfgTel')}</td></tr>
+    <tr><td>@</td><td>${n('cfgRemitente')}</td></tr>
+    <tr><td>✦</td><td>${n('cfgEmpresa')}</td></tr>
+  </table>
+</div>`;
+}
+
+function openGroupModal() {
+  const items = nps.filter(n => seleccionados.has(n.id));
+  if (items.length === 0) return;
+
+  document.getElementById('gmCount').textContent = items.length;
+  document.getElementById('gmNota').value = '';
+
+  // Renderizar ítems editables
+  document.getElementById('gmItems').innerHTML = items.map(np => `
+    <div class="modal-group-item">
+      <span class="mgi-np">NP-${np.np}</span>
+      <span class="mgi-det">${np.detalle}</span>
+      <div class="mgi-qty-wrap">
+        <input class="mgi-qty" type="number" value="${np.cantAutorizar}"
+          min="0.01" step="0.01"
+          oninput="updateGroupQty(${np.id}, this.value)">
+        <span class="mgi-um">${np.um}</span>
+      </div>
+    </div>
+  `).join('');
+
+  refreshGroupPreview();
+  document.getElementById('groupModal').classList.add('open');
+}
+
+function updateGroupQty(id, val) {
+  const np = nps.find(n => n.id === id);
+  if (np) np.cantAutorizar = parseFloat(val) || np.cantOriginal;
+  refreshGroupPreview();
+}
+
+function refreshGroupPreview() {
+  const items = nps.filter(n => seleccionados.has(n.id));
+  const nota = document.getElementById('gmNota')?.value || '';
+  document.getElementById('gmSubj').textContent = buildGroupSubject(items);
+  document.getElementById('gmBody').textContent = buildGroupBody(items, nota);
+}
+
+document.getElementById('gmNota')?.addEventListener('input', refreshGroupPreview);
+
+function closeGroupModal() {
+  document.getElementById('groupModal').classList.remove('open');
+}
+
+function sendGroupAutorizacion() {
+  const items = nps.filter(n => seleccionados.has(n.id));
+  if (items.length === 0) return;
+  if (destinatarios.length === 0) { toast('Agregá al menos un destinatario','error'); return; }
+
+  const nota = document.getElementById('gmNota').value.trim();
+  const subject = buildGroupSubject(items);
+  const body = buildGroupBody(items, nota);
+
+  abrirGmail(subject, body);
+
+  // Marcar todos como autorizados
+  const now = new Date();
+  const p = x => String(x).padStart(2,'0');
+  const hora = `${p(now.getHours())}:${p(now.getMinutes())}`;
+  items.forEach(np => { np.estado = 'autorizado'; np.horaAut = hora; });
+
+  const msg = items.length === 1
+    ? `✓ NP-${items[0].np} autorizada`
+    : `✓ ${items.length} ítems autorizados: ${items.map(n=>'NP-'+n.np).join(', ')}`;
+
+  addLog(items[0], msg);
+  toast(`Gmail abierto — ${msg}`, 'success');
+  saveEstadoDia();
+  cerrarDia(isoHoy(), nps);
+  items.forEach(np => registrarEnSheets(np));
+  items.forEach(np => registrarImputacionPendiente(np));
+
+  seleccionados.clear();
+  updateGroupBar();
+  closeGroupModal();
+  renderList();
+  updateStats();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function renderList() {
+  const list = document.getElementById('npList');
+  const data = filtro === 'todos' ? nps : nps.filter(n => n.estado === filtro);
+
+  if (data.length === 0) {
+    list.innerHTML = `<div class="empty-state">Sin NPs para mostrar.<br><br>
+      ${nps.length === 0 ? 'Hacé click en "Actualizar planilla" para cargar los datos del día.' : 'Cambiá el filtro para ver otros estados.'}</div>`;
+    return;
+  }
+
+  list.innerHTML = data.map(np => {
+    const esActivo = np.estado === 'pendiente' || np.estado === 'parcial';
+    const esCerrado = np.estado === 'autorizado' || np.estado === 'reprogramado';
+    const estadoLabel = {
+      pendiente: 'Pendiente', autorizado: '✓ Autorizado',
+      parcial: '⚡ Parcial', reprogramado: '⟳ Reprogramado'
+    }[np.estado] || np.estado;
+    return `
+    <div class="np-row-wrap ${np.estado} ${seleccionados.has(np.id) ? 'selected' : ''}" id="card-${np.id}">
+      <div class="np-row" style="grid-template-columns: 36px 80px 1fr 180px 90px 60px 110px 130px;" onclick="toggleExpand(${np.id})">
+        <div class="td cb-wrap" onclick="event.stopPropagation()">
+          ${esActivo
+            ? `<input type="checkbox" class="cb" ${seleccionados.has(np.id) ? 'checked' : ''}
+                onchange="toggleSelect(${np.id}, this.checked)">`
+            : `<span style="color:var(--text-dim);font-size:14px;">${np.estado==='autorizado'?'✓':'⟳'}</span>`
+          }
+        </div>
+        <div class="td td-np">NP-${np.np}</div>
+        <div class="td td-cliente">${np.cliente || '—'}</div>
+        <div class="td td-detalle">${np.detalle || '—'}</div>
+        <div class="td td-cant">${np.cantAutorizar}${parsearCant(np.cantAutorizar) < parsearCant(np.cantOriginal) ? `<span style="font-size:9px;color:var(--orange);display:block;">orig: ${np.cantOriginal}</span>` : ''}</div>
+        <div class="td td-um">${np.um}</div>
+        <div class="td">
+          <span class="status-pill ${np.estado}">${estadoLabel}</span>
+          ${np.horaAut ? `<div style="font-family:var(--mono);font-size:9px;color:var(--text-dim);margin-top:3px;">${np.horaAut}</div>` : ''}
+          ${np.causa ? `<div style="font-size:9px;color:var(--orange);margin-top:2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${np.causa}">${np.causa}</div>` : ''}
+        </div>
+        <div class="td">
+          ${esActivo
+            ? `<button class="btn-autorizar" onclick="event.stopPropagation();openExpand(${np.id})">▶ Autorizar</button>`
+            : `<button class="btn-ver" onclick="event.stopPropagation();openExpand(${np.id})">Ver detalle</button>`
+          }
+        </div>
+      </div>
+      <div class="np-expand ${expandId === np.id ? 'open' : ''}" id="exp-${np.id}">
+        <div class="expand-col">
+          <div class="expand-lbl">Cantidad a autorizar</div>
+          <div class="qty-row">
+            <input class="qty-inp" type="number" id="qty-${np.id}"
+              value="${np.cantAutorizar}" min="0.01" step="0.01"
+              oninput="updateQty(${np.id},this.value)"
+              ${esCerrado ? 'disabled' : ''}>
+            <span class="qty-um">${np.um}</span>
+          </div>
+          ${parsearCant(np.cantAutorizar) < parsearCant(np.cantOriginal) ? `<div class="qty-hint">Original: ${np.cantOriginal} ${np.um}</div>` : ''}
+          ${np.causa ? `<div class="expand-lbl" style="margin-top:10px;">Motivo</div><div style="font-size:12px;color:var(--orange);">${np.causa}</div>` : ''}
+          <div class="qty-hint" style="margin-top:8px;">Modificá la cantidad antes de enviar si es necesario</div>
+        </div>
+        <div class="mail-prev">
+          <div class="mail-prev-lbl">Vista previa del mail</div>
+          <div class="mail-subj" id="ms-${np.id}">${getMailSubject(np)}</div>
+          <div class="mail-body-prev" id="mb-${np.id}">${getMailBody(np)}</div>
+        </div>
+        <div class="expand-send-col">
+          ${esActivo ? `
+          <button class="btn-send-real" id="btnSend-${np.id}" onclick="sendAutorizacion(${np.id})">✉ Enviar</button>
+          <button class="btn-mark-parcial" onclick="markParcial(${np.id})">⚡ Parcial</button>
+          <button class="btn-mark-parcial" style="border-color:var(--orange);color:var(--orange);" onclick="event.stopPropagation();openReprogModal(${np.id})">⟳ Reprogramar</button>
+          ` : `<button class="btn-ver" style="width:100%;" disabled>${estadoLabel}</button>`}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleExpand(id) {
+  expandId = expandId === id ? null : id;
+  renderList();
+}
+
+function openExpand(id) {
+  expandId = id;
+  renderList();
+  setTimeout(() => document.getElementById(`exp-${id}`)?.scrollIntoView({ behavior:'smooth', block:'nearest' }), 50);
+}
+
+function updateQty(id, val) {
+  const np = nps.find(n => n.id === id);
+  if (!np) return;
+  np.cantAutorizar = parseFloat(val) || np.cantOriginal;
+  const ms = document.getElementById(`ms-${id}`);
+  const mb = document.getElementById(`mb-${id}`);
+  if (ms) ms.textContent = getMailSubject(np);
+  if (mb) mb.textContent = getMailBody(np);
+}
+
+function refreshMailPreviews() {
+  nps.forEach(np => {
+    const ms = document.getElementById(`ms-${np.id}`);
+    const mb = document.getElementById(`mb-${np.id}`);
+    if (ms) ms.textContent = getMailSubject(np);
+    if (mb) mb.textContent = getMailBody(np);
+  });
+}
+
+function markParcial(id) {
+  const np = nps.find(n => n.id === id);
+  if (!np) return;
+  np.estado = 'parcial';
+  addLog(np, `⚡ NP-${np.np} marcada PARCIAL — ${np.cantAutorizar} ${np.um}`);
+  toast(`NP-${np.np} marcada como parcial`, 'warn');
+  saveEstadoDia();
+  cerrarDia(isoHoy(), nps);
+  registrarEnSheets(np);
+  updateStats();
+  renderList();
+}
+
+function updateStats() {
+  document.getElementById('sTotal').textContent = nps.length;
+  document.getElementById('sPend').textContent = nps.filter(n=>n.estado==='pendiente').length;
+  document.getElementById('sAut').textContent = nps.filter(n=>n.estado==='autorizado').length;
+  document.getElementById('sPar').textContent = nps.filter(n=>n.estado==='parcial').length;
+}
+
+function setFilter(f, btn) {
+  filtro = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────────
+function addLog(np, msg) {
+  const n = new Date();
+  const p = x => String(x).padStart(2,'0');
+  logEntries.unshift({ time: `${p(n.getHours())}:${p(n.getMinutes())}`, msg });
+  const body = document.getElementById('logBody');
+  body.innerHTML = logEntries.map(e => `
+    <div class="log-item">
+      <span class="log-t">${e.time}</span>
+      <span class="log-m">${e.msg}</span>
+    </div>
+  `).join('');
+}
+
+let logOpen = true;
+function toggleLog() {
+  logOpen = !logOpen;
+  document.getElementById('logBody').style.display = logOpen ? '' : 'none';
+  document.getElementById('logToggle').textContent = logOpen ? '▼' : '▶';
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────────────────
+function openAddModal() {
+  const today = new Date();
+  const p = x => String(x).padStart(2,'0');
+  document.getElementById('mFecha').value = `${today.getFullYear()}-${p(today.getMonth()+1)}-${p(today.getDate())}`;
+  document.getElementById('addModal').classList.add('open');
+}
+function closeAddModal() {
+  document.getElementById('addModal').classList.remove('open');
+  ['mNP','mCliente','mDetalle','mCant','mUM'].forEach(id => document.getElementById(id).value = '');
+}
+function addNPManual() {
+  const np = document.getElementById('mNP').value.trim();
+  const cli = document.getElementById('mCliente').value.trim();
+  const det = document.getElementById('mDetalle').value.trim();
+  const cant = parseFloat(document.getElementById('mCant').value) || 0;
+  const um = document.getElementById('mUM').value.trim() || 'unid';
+  if (!np || !cli || !det || !cant) { toast('Completá todos los campos','error'); return; }
+  nps.unshift({ id: nextId++, np, cliente:cli, detalle:det, cantOriginal:cant, cantAutorizar:cant, um, estado:'pendiente', horaAut:null, source:'manual' });
+  closeAddModal();
+  updateStats();
+  renderList();
+  toast(`NP-${np} agregada manualmente`, 'success');
+}
+
+document.getElementById('addModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeAddModal(); });
+document.getElementById('groupModal').addEventListener('click', e => { if(e.target === e.currentTarget) closeGroupModal(); });
+document.addEventListener('keydown', e => { if(e.key==='Escape') { closeAddModal(); closeGroupModal(); } });
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function toast(msg, type='success') {
+  const icons = { success:'✓', error:'✕', warn:'⚠', info:'ℹ' };
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<b>${icons[type]||'●'}</b> ${msg}`;
+  document.getElementById('toastWrap').appendChild(el);
+  setTimeout(() => { el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 4000);
+}
+
+// ── ERRORS ────────────────────────────────────────────────────────────────────
+function showError(msg) {
+  const el = document.getElementById('errorBanner');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('errorBanner').classList.remove('show');
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+// switchTab definido más abajo junto con imputación y plan
+
+// ── STORAGE HISTORIAL (localStorage) ─────────────────────────────────────────
+const HIST_KEY     = 'cds_historial_v1';
+const SNAPSHOT_KEY = 'cds_snapshot_v1';
+const ESTADO_KEY   = 'cds_estado_dia_v1'; // persiste el estado del día actual
+
+function loadHist() {
+  try { return JSON.parse(localStorage.getItem(HIST_KEY) || '{}'); } catch { return {}; }
+}
+function saveHist(h) { localStorage.setItem(HIST_KEY, JSON.stringify(h)); }
+
+function loadSnapshot() {
+  try { return JSON.parse(localStorage.getItem(SNAPSHOT_KEY) || 'null'); } catch { return null; }
+}
+function saveSnapshot(snap) { localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(snap)); }
+
+// Estado del día: guarda estado, horaAut y causa de cada NP
+function loadEstadoDia() {
+  try { return JSON.parse(localStorage.getItem(ESTADO_KEY) || 'null'); } catch { return null; }
+}
+function saveEstadoDia() {
+  const estado = {
+    fecha: isoHoy(),
+    nps: nps.map(n => ({ np: n.np, estado: n.estado, horaAut: n.horaAut||null, causa: n.causa||null, cantAutorizar: n.cantAutorizar }))
+  };
+  localStorage.setItem(ESTADO_KEY, JSON.stringify(estado));
+}
+
+// Restaurar estado del día si el refresh es del mismo día
+function restaurarEstadoDia() {
+  const est = loadEstadoDia();
+  if (!est || est.fecha !== isoHoy()) return;
+  est.nps.forEach(saved => {
+    const np = nps.find(n => n.np === saved.np);
+    if (np) {
+      np.estado = saved.estado;
+      np.horaAut = saved.horaAut;
+      np.causa = saved.causa;
+      np.cantAutorizar = saved.cantAutorizar || np.cantOriginal;
+    }
+  });
+}
+
+// Guardar snapshot del día actual cuando se carga la planilla
+function guardarSnapshotHoy() {
+  const hoy = isoHoy();
+  const snap = loadSnapshot();
+  // Solo guardar si no hay snapshot de hoy ya
+  if (snap && snap.fecha === hoy) return;
+  const nuevo = {
+    fecha: hoy,
+    nps: nps.map(n => ({
+      np: n.np, cliente: n.cliente, detalle: n.detalle,
+      cant: n.cantOriginal, um: n.um
+    }))
+  };
+  saveSnapshot(nuevo);
+}
+
+// Al cerrar el día (o al iniciar el día siguiente): registrar resultados en historial
+function cerrarDia(fecha, npsDelDia) {
+  const hist = loadHist();
+  hist[fecha] = npsDelDia.map(n => ({
+    np: n.np, cliente: n.cliente, detalle: n.detalle,
+    cant: n.cantOriginal, um: n.um,
+    estado: n.estado, horaAut: n.horaAut || null, causa: n.causa || null
+  }));
+  saveHist(hist);
+}
+
+function isoHoy() {
+  const d = new Date();
+  const p = x => String(x).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+
+function isoAFecha(iso) {
+  // YYYY-MM-DD → DD/MM/YYYY
+  const [y,m,d] = iso.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+// ── JUSTIFICACIÓN DE PENDIENTES ───────────────────────────────────────────────
+let pendientesQueue = []; // NPs del día anterior que quedaron pendientes
+let justifIdx = 0;
+
+function checkPendientesAyer() {
+  const snap = loadSnapshot();
+  if (!snap) return; // primer uso, no hay snapshot
+  const hoy = isoHoy();
+  if (snap.fecha === hoy) return; // el snapshot es de hoy, no de ayer
+
+  // El snapshot es de un día anterior: buscar las que quedaron pendientes
+  const hist = loadHist();
+  const registroAyer = hist[snap.fecha];
+
+  // NPs del snapshot que no fueron autorizadas (incluye reprogramadas sin causa del día anterior)
+  pendientesQueue = snap.nps.filter(snapNP => {
+    if (!registroAyer) return true;
+    const registrada = registroAyer.find(r => r.np === snapNP.np);
+    if (!registrada) return true;
+    // Si fue autorizada, no pedir justificación
+    if (registrada.estado === 'autorizado') return false;
+    // Si fue reprogramada con causa ya registrada, no volver a pedir
+    if (registrada.estado === 'reprogramado' && registrada.causa) return false;
+    return true;
+  });
+
+  if (pendientesQueue.length === 0) {
+    // Todo bien, guardar el snapshot de hoy cuando cargue la planilla
+    return;
+  }
+
+  // Mostrar modal de justificación
+  justifIdx = 0;
+  mostrarJustifActual(snap.fecha);
+}
+
+function mostrarJustifActual(fechaSnap) {
+  if (justifIdx >= pendientesQueue.length) {
+    // Guardar todas las justificaciones en el historial
+    const hist = loadHist();
+    if (!hist[fechaSnap]) hist[fechaSnap] = [];
+    pendientesQueue.forEach(np => {
+      const existe = hist[fechaSnap].find(r => r.np === np.np);
+      if (existe) {
+        existe.causa = np.causa;
+        existe.estado = 'pendiente';
+      } else {
+        hist[fechaSnap].push({ ...np, estado: 'pendiente' });
+      }
+    });
+    saveHist(hist);
+    document.getElementById('justifModal').classList.remove('open');
+    toast(`Justificaciones guardadas para ${pendientesQueue.length} NP(s)`, 'success');
+    // Limpiar snapshot anterior
+    saveSnapshot(null);
+    return;
+  }
+
+  const np = pendientesQueue[justifIdx];
+  document.getElementById('justifNPNum').textContent = `NP-${np.np} · ${np.cliente}`;
+  document.getElementById('justifNPDet').textContent = `${np.cant} ${np.um} — ${np.detalle}`;
+  document.getElementById('justifProgress').textContent =
+    `${justifIdx + 1} de ${pendientesQueue.length} NPs pendientes`;
+  document.querySelectorAll('input[name=justifCausa]').forEach(r => r.checked = false);
+  document.getElementById('justifOtrasDiv').classList.remove('show');
+  document.getElementById('justifOtrasText').value = '';
+  document.getElementById('justifModal').classList.add('open');
+}
+
+function toggleOtras() {
+  setTimeout(() => {
+    const sel = document.querySelector('input[name=justifCausa]:checked');
+    const div = document.getElementById('justifOtrasDiv');
+    div.classList.toggle('show', sel && sel.value === 'otras');
+  }, 50);
+}
+
+function saveJustificacion() {
+  const sel = document.querySelector('input[name=justifCausa]:checked');
+  if (!sel) { toast('Seleccioná una causa', 'warn'); return; }
+  let causa = sel.value;
+  if (causa === 'otras') {
+    const txt = document.getElementById('justifOtrasText').value.trim();
+    if (!txt) { toast('Describí el motivo', 'warn'); return; }
+    causa = `Otras: ${txt}`;
+  }
+  pendientesQueue[justifIdx].causa = causa;
+  justifIdx++;
+  const snap = loadSnapshot();
+  mostrarJustifActual(snap ? snap.fecha : isoHoy());
+}
+
+// ── HISTORIAL: FILTRO Y RENDER ────────────────────────────────────────────────
+async function applyHistFilter() {
+  const desde = document.getElementById('histDesde').value;
+  const hasta = document.getElementById('histHasta').value;
+
+  // Mostrar loading
+  document.getElementById('histRows').innerHTML = `<div class="empty-state" style="padding:32px;"><div class="spinner dark" style="margin:0 auto 10px;"></div>Cargando historial...</div>`;
+
+  // Leer desde Sheets
+  const sheetData = await cargarHistorialSheets();
+
+  // Filtrar por fecha
+  const rows = sheetData.filter(r => {
+    if (!r.fecha) return false;
+    const iso = fechaAIso(String(r.fecha));
+    if (desde && iso < desde) return false;
+    if (hasta && iso > hasta) return false;
+    return true;
+  }).sort((a,b) => fechaAIso(String(b.fecha)).localeCompare(fechaAIso(String(a.fecha))));
+
+  // Stats
+  const total = rows.length;
+  const aut   = rows.filter(r => String(r.estado).toLowerCase() === 'autorizado').length;
+  const pend  = rows.filter(r => String(r.estado).toLowerCase() !== 'autorizado').length;
+  const pct   = total > 0 ? Math.round(aut/total*100) : 0;
+
+  document.getElementById('hTotal').textContent = total || '—';
+  document.getElementById('hAut').textContent   = aut   || '—';
+  document.getElementById('hPend').textContent  = pend  || '—';
+  document.getElementById('hPct').textContent   = total > 0 ? `${pct}%` : '—';
+
+  // Tabla
+  const tbody = document.getElementById('histRows');
+  if (rows.length === 0) {
+    tbody.innerHTML = `<div class="empty-state" style="padding:32px;">Sin registros para el período seleccionado.</div>`;
+  } else {
+    tbody.innerHTML = rows.map(r => {
+      const estadoLower = String(r.estado).toLowerCase();
+      const pillClass = estadoLower === 'autorizado' ? 'aut' : 'pend';
+      const pillLabel = r.estado;
+      return `
+      <div class="hist-row">
+        <div class="hist-td mono">${r.fecha}</div>
+        <div class="hist-td mono" style="color:var(--accent);">NP-${r.np}</div>
+        <div class="hist-td" style="overflow:hidden;">
+          <div style="font-weight:600;font-size:11px;">${r.cliente}</div>
+          <div style="font-size:10px;color:var(--text-muted);">${r.detalle}</div>
+        </div>
+        <div class="hist-td muted">${r.cant} ${r.um}</div>
+        <div class="hist-td"><span class="hist-pill ${pillClass}">${pillLabel}</span></div>
+        <div class="hist-td muted">${r.causa ? `<span class="hist-pill justif">${r.causa}</span>` : '—'}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Gráfico de causas
+  const causas = {};
+  rows.filter(r => r.causa).forEach(r => {
+    causas[r.causa] = (causas[r.causa] || 0) + 1;
+  });
+  const sortedCausas = Object.entries(causas).sort((a,b) => b[1]-a[1]);
+  const maxC = sortedCausas[0]?.[1] || 1;
+  const chart = document.getElementById('causaChart');
+  if (sortedCausas.length === 0) {
+    chart.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--text-dim);padding:20px 0;">Sin causas registradas aún.</div>`;
+  } else {
+    chart.innerHTML = sortedCausas.map(([causa, cnt]) => `
+      <div class="causa-bar-row">
+        <div class="causa-bar-lbl" title="${causa}">${causa}</div>
+        <div class="causa-bar-track"><div class="causa-bar-fill" style="width:${Math.round(cnt/maxC*100)}%"></div></div>
+        <div class="causa-bar-count">${cnt}</div>
+      </div>
+    `).join('');
+  }
+}
+
+function fechaAIso(f) {
+  // DD/MM/YYYY → YYYY-MM-DD para ordenar
+  const m = f.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return f; // si ya es ISO o formato desconocido, devolver igual
+}
+
+// Exportar CSV
+async function exportCSV() {
+  const data = await cargarHistorialSheets();
+  const header = ['Fecha','NP','Cliente','Detalle','Cant','UM','Estado','Causa'];
+  const rows = data.map(r => [r.fecha, r.np, r.cliente, r.detalle, r.cant, r.um, r.estado, r.causa||'']);
+  const csv = [header, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `historial_carga_${isoHoy()}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Inicializar fechas del filtro (último mes por defecto)
+function initHistFiltros() {
+  const hoy = new Date();
+  const p = x => String(x).padStart(2,'0');
+  const hasta = `${hoy.getFullYear()}-${p(hoy.getMonth()+1)}-${p(hoy.getDate())}`;
+  const desde30 = new Date(hoy); desde30.setDate(hoy.getDate()-30);
+  const desde = `${desde30.getFullYear()}-${p(desde30.getMonth()+1)}-${p(desde30.getDate())}`;
+  document.getElementById('histDesde').value = desde;
+  document.getElementById('histHasta').value = hasta;
+}
+
+// ── CERRAR DÍA AUTOMÁTICO ─────────────────────────────────────────────────────
+// Guardar estado actual en historial al final del día (antes de cerrar)
+window.addEventListener('beforeunload', () => {
+  const snap = loadSnapshot();
+  if (!snap || snap.fecha !== isoHoy()) return;
+  // Solo guardar si hay datos cargados
+  if (nps.length === 0) return;
+  cerrarDia(isoHoy(), nps);
+});
+
+// ── IMPUTACIÓN ────────────────────────────────────────────────────────────────
+const IMPUT_SHEET = 'IMPUTACION_SALIDAS';
+let imputacionesBloqueantes = [];
+
+async function cargarImputaciones() {
+  try {
+    const res = await fetch(`${APPS_SCRIPT_URL}?hoja=${IMPUT_SHEET}`);
+    const json = await res.json();
+    return json.ok ? json.data : [];
+  } catch(e) { return []; }
+}
+
+async function guardarImputacion(item) {
+  const normCant = v => v !== undefined && v !== '' ? String(v).replace('.',',') : '';
+  const params = new URLSearchParams({
+    hoja: IMPUT_SHEET,
+    lineaid: item.lineaid||'', fechaaut: item.fechaaut||'',
+    np: item.np||'', cliente: item.cliente||'', detalle: item.detalle||'',
+    cant: normCant(item.cant), cantreal: normCant(item.cantreal||item.cant),
+    um: item.um||'',
+    pvremito: item.pvremito||'', nroremito: item.nroremito||'',
+    pvfactura: item.pvfactura||'', nrofactura: item.nrofactura||'',
+    fechaimput: item.fechaimput||'', diasdemora: item.diasdemora||'',
+    estado: item.estado||'Pendiente',
+    notasalteo: item.notasalteo||''
+  });
+  try { await fetch(`${APPS_SCRIPT_URL}?${params}`, {method:'POST',mode:'no-cors'}); } catch(e) {}
+}
+
+async function registrarImputacionPendiente(np) {
+  const params = new URLSearchParams({
+    hoja: IMPUT_SHEET,
+    lineaid: np.lineaId||np.np, fechaaut: todayFormatted(),
+    np: np.np, cliente: np.cliente, detalle: np.detalle,
+    cant: np.cantAutorizar, um: np.um,
+    pvremito:'', nroremito:'', pvfactura:'', nrofactura:'',
+    fechaimput:'', diasdemora:'', estado:'Pendiente'
+  });
+  try { await fetch(`${APPS_SCRIPT_URL}?${params}`, {method:'POST',mode:'no-cors'}); } catch(e) {}
+}
+
+function diasEntre(fechaStr, hasta) {
+  const parseF = f => {
+    if (!f) return null;
+    const m = String(f).match(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+    return m ? new Date(parseInt(m[3]),parseInt(m[2])-1,parseInt(m[1])) : null;
+  };
+  const d1 = parseF(fechaStr);
+  const d2 = hasta || new Date();
+  if (!d1) return null;
+  return Math.floor((d2-d1)/(1000*60*60*24));
+}
+
+function fmtDoc(pv, nro) {
+  if (!nro) return '—';
+  return `${String(pv||'').padStart(5,'0')}-${String(nro||'').padStart(8,'0')}`;
+}
+
+async function checkImputacionesPendientes() {
+  const data = await cargarImputaciones();
+  const ahora = new Date();
+  const pendientes = data.filter(r => String(r.estado||'').toLowerCase() !== 'imputado');
+  const vencidas  = pendientes.filter(r => (diasEntre(r.fechaaut, ahora)||0) > 4);
+  const porVencer = pendientes.filter(r => { const d = diasEntre(r.fechaaut, ahora)||0; return d >= 2 && d <= 4; });
+  imputacionesBloqueantes = vencidas;
+  const badge = document.getElementById('imputBadge');
+  const total = vencidas.length + porVencer.length;
+  badge.textContent = total; badge.style.display = total > 0 ? 'inline' : 'none';
+  if (total > 0) {
+    const list = document.getElementById('imputAlertaList');
+    list.innerHTML = [...vencidas,...porVencer].map(r => {
+      const dias = diasEntre(r.fechaaut, ahora)||0;
+      return `<div style="background:var(--bg);border:1px solid var(--border);border-left:3px solid ${dias>=2?'var(--red)':'var(--yellow)'};padding:10px 14px;">
+        <div style="display:flex;justify-content:space-between;">
+          <span style="font-family:var(--mono);font-size:12px;font-weight:600;color:var(--accent);">NP-${r.np}</span>
+          <span class="dias-badge ${dias>=2?'vencido':'warn'}">${dias}d</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${r.cliente} · ${r.detalle} · Aut: ${r.fechaaut}</div>
+      </div>`;
+    }).join('');
+    document.getElementById('imputAlertaModal').classList.add('open');
+  }
+}
+
+function hayBloqueoImputacion() { return imputacionesBloqueantes.length > 0; }
+
+// ── PLAN SEMANAL ─────────────────────────────────────────────────────────────
+let planCache = null;
+let planRegistroCache = null;
+
+// Obtener lunes y viernes de la semana actual
+function getSemanaActual() {
+  const hoy = new Date();
+  const dow = hoy.getDay(); // 0=dom, 1=lun...
+  const diffLunes = dow === 0 ? -6 : 1 - dow;
+  const lunes = new Date(hoy); lunes.setDate(hoy.getDate() + diffLunes);
+  const viernes = new Date(lunes); viernes.setDate(lunes.getDate() + 4);
+  lunes.setHours(0,0,0,0); viernes.setHours(23,59,59,999);
+  return { lunes, viernes };
+}
+
+function fechaADate(f) {
+  if (!f) return null;
+  // Serial Excel
+  const serial = parseFloat(String(f));
+  if (!isNaN(serial) && serial > 40000 && String(f).match(/^\d+(\.\d+)?$/)) {
+    return new Date((serial - 25569) * 86400 * 1000);
+  }
+  // DD/MM/YYYY
+  let m = String(f).match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+  if (m) return new Date(parseInt(m[3]), parseInt(m[2])-1, parseInt(m[1]));
+  // Texto español
+  const meses = {enero:0,febrero:1,marzo:2,abril:3,mayo:4,junio:5,julio:6,agosto:7,septiembre:8,octubre:9,noviembre:10,diciembre:11};
+  const mNombre = String(f).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[,\.]/g,' ').replace(/\s+/g,' ').trim();
+  const mMatch = mNombre.match(/(\d{1,2})\s+de\s+([a-z]+)(?:\s+de\s+(\d{4}))?/);
+  if (mMatch && meses[mMatch[2]] !== undefined) {
+    return new Date(mMatch[3] ? parseInt(mMatch[3]) : new Date().getFullYear(), meses[mMatch[2]], parseInt(mMatch[1]));
+  }
+  return null;
+}
+
+function isoDate(d) {
+  if (!d) return '';
+  const p = x => String(x).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+
+function ddmm(d) {
+  if (!d) return '';
+  const p = x => String(x).padStart(2,'0');
+  return `${p(d.getDate())}/${p(d.getMonth()+1)}`;
+}
+
+function nombreMes(d) {
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  return `${meses[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+async function loadPlanSemanal(forzar = false) {
+  if (planCache && !forzar) { renderPlanSemanal(); return; }
+  document.getElementById('planSemanaContainer').innerHTML = `<div class="empty-state" style="padding:40px;"><div class="spinner dark" style="margin:0 auto 12px;"></div>Cargando plan...</div>`;
+
+  try {
+    // Cargar TODAS las filas de la planilla (no solo hoy)
+    const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/A:AB?key=${API_KEY}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    const rows = data.values || [];
+    if (rows.length < 2) { planCache = []; renderPlanSemanal(); return; }
+
+    // Buscar fila de headers
+    let headerRowIdx = -1;
+    for (let i = 0; i < Math.min(rows.length, 8); i++) {
+      const joined = (rows[i]||[]).join('|').toLowerCase();
+      if (joined.includes('cliente') && joined.includes('cant')) { headerRowIdx = i; break; }
+    }
+    if (headerRowIdx < 0) { planCache = []; renderPlanSemanal(); return; }
+
+    const headers = rows[headerRowIdx].map(h => (h||'').toString().trim().toLowerCase().replace(/\n/g,' ').replace(/\s+/g,' '));
+    const colIdx = name => {
+      const variants = {
+        'n° np': ['n° np','nº np','nro np','n°np','numero np'],
+        'cliente': ['cliente','razón social','razon social'],
+        'detalle': ['detalle','producto','descripcion'],
+        'cant': ['cant','cantidad','qty'],
+        'um': ['um','u.m.','unidad']
+      };
+      const list = variants[name]||[name];
+      for (const v of list) {
+        const idx = headers.findIndex(h => h === v || h.includes(v) || v.includes(h));
+        if (idx >= 0) return idx;
+      }
+      return -1;
+    };
+
+    const iNP = colIdx('n° np'), iCli = colIdx('cliente'), iDet = colIdx('detalle');
+    const iCant = colIdx('cant'), iUM = colIdx('um');
+    const iFecha = 27; // Columna AB
+
+    const allNPs = [];
+    for (let i = headerRowIdx + 1; i < rows.length; i++) {
+      const r = rows[i];
+      if (!r || r.length === 0) continue;
+      const np = iNP >= 0 ? (r[iNP]||'').toString().trim() : '';
+      const cli = iCli >= 0 ? (r[iCli]||'').toString().trim() : '';
+      const det = iDet >= 0 ? (r[iDet]||'').toString().trim() : '';
+      const cantRaw = iCant >= 0 ? (r[iCant]||'0').toString().replace(/\./g,'').replace(',','.') : '0';
+      const cant = parseFloat(cantRaw) || 0;
+      const um = iUM >= 0 ? (r[iUM]||'').toString().trim() : '';
+      const fechaRaw = r.length > iFecha ? (r[iFecha]||'').toString().trim() : '';
+      if (!np && !cli) continue;
+      const fechaDate = fechaADate(fechaRaw);
+      allNPs.push({ np, cliente: cli, detalle: det, cant, um, fechaRaw, fechaDate, rowIndex: i, lineaId: `${np}_${i}` });
+    }
+    planCache = allNPs;
+
+    // Cargar estado desde REGISTRO_CARGAS
+    try {
+      const rRes = await fetch(`${APPS_SCRIPT_URL}?hoja=REGISTRO_CARGAS`);
+      const rJson = await rRes.json();
+      planRegistroCache = rJson.ok ? rJson.data : [];
+    } catch(_) { planRegistroCache = []; }
+
+    renderPlanSemanal();
+  } catch(err) {
+    console.error('Error cargando plan:', err);
+    document.getElementById('planSemanaContainer').innerHTML = `<div class="empty-state" style="padding:40px;">Error al cargar. Verificá la conexión.</div>`;
+  }
+}
+
+function getEstadoNP(lineaId, np) {
+  if (!planRegistroCache) return 'pendiente';
+  // Buscar por lineaId primero, luego por np
+  const reg = planRegistroCache.find(r => String(r.lineid||r.lineaid) === String(lineaId))
+           || planRegistroCache.find(r => String(r.np) === String(np));
+  if (!reg) return 'pendiente';
+  const e = String(reg.estado||'').toLowerCase();
+  if (e === 'autorizado') return 'autorizado';
+  if (e === 'reprogramado') return 'reprogramado';
+  return 'pendiente';
+}
+
+function renderPlanSemanal() {
+  const container = document.getElementById('planSemanaContainer');
+  if (!planCache) return;
+
+  const { lunes, viernes } = getSemanaActual();
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+
+  // Etiqueta de semana
+  document.getElementById('planSemanaLabel').textContent = `Semana ${ddmm(lunes)} — ${ddmm(viernes)}`;
+
+  // Separar NPs en grupos
+  const semana = [[], [], [], [], []]; // lun-vie
+  const futuras = {}; // key: "YYYY-MM" → array
+  const sinFecha = [];
+
+  planCache.forEach(np => {
+    if (!np.fechaDate) { sinFecha.push(np); return; }
+    const fd = new Date(np.fechaDate); fd.setHours(0,0,0,0);
+    if (fd >= lunes && fd <= viernes) {
+      const dow = fd.getDay();
+      const idx = dow === 0 ? 4 : dow - 1; // lun=0...vie=4
+      if (idx >= 0 && idx <= 4) semana[idx].push(np);
+    } else if (fd > viernes) {
+      const key = `${fd.getFullYear()}-${String(fd.getMonth()+1).padStart(2,'0')}`;
+      if (!futuras[key]) futuras[key] = [];
+      futuras[key].push(np);
+    }
+    // Las anteriores al lunes no las mostramos
+  });
+
+  const dias = ['Lunes','Martes','Miércoles','Jueves','Viernes'];
+
+  // Stats semana
+  const totalSemana = semana.flat().length;
+  const autSemana = semana.flat().filter(n => getEstadoNP(n.lineaId, n.np) === 'autorizado').length;
+  const pendSemana = totalSemana - autSemana;
+  const totalFuturas = Object.values(futuras).flat().length;
+
+  let html = `
+    <div class="plan-stats-row">
+      <div class="plan-stat-card">
+        <div class="plan-stat-val" style="color:var(--accent);">${totalSemana}</div>
+        <div class="plan-stat-lbl">NPs esta semana</div>
+      </div>
+      <div class="plan-stat-card">
+        <div class="plan-stat-val" style="color:var(--green);">${autSemana}</div>
+        <div class="plan-stat-lbl">Autorizadas</div>
+      </div>
+      <div class="plan-stat-card">
+        <div class="plan-stat-val" style="color:var(--yellow);">${pendSemana}</div>
+        <div class="plan-stat-lbl">Pendientes</div>
+      </div>
+      <div class="plan-stat-card">
+        <div class="plan-stat-val" style="color:var(--text-muted);">${totalFuturas}</div>
+        <div class="plan-stat-lbl">Próximas semanas</div>
+      </div>
+    </div>
+
+    <div class="plan-seccion-titulo">
+      <span>Semana en curso</span>
+      <span>${ddmm(lunes)} al ${ddmm(viernes)}</span>
+    </div>
+
+    <div class="plan-semana-grid">`;
+
+  semana.forEach((npsDia, idx) => {
+    const diaDate = new Date(lunes); diaDate.setDate(lunes.getDate() + idx);
+    const esHoy = isoDate(diaDate) === isoDate(hoy);
+    html += `<div class="plan-dia-col${esHoy?' hoy':''}">
+      <div class="plan-dia-header">
+        <span class="plan-dia-nombre">${dias[idx]}</span>
+        <span class="plan-dia-fecha">${ddmm(diaDate)}</span>
+      </div>
+      <div class="plan-dia-body">`;
+
+    if (npsDia.length === 0) {
+      html += `<div class="plan-empty-dia">Sin NPs</div>`;
+    } else {
+      npsDia.forEach(np => {
+        const est = getEstadoNP(np.lineaId, np.np);
+        const estLabel = est === 'autorizado' ? '✓ Autorizado' : est === 'reprogramado' ? '⟳ Reprog.' : '⏳ Pendiente';
+        html += `<div class="plan-np-card ${est}">
+          <div class="plan-np-num">NP-${np.np}</div>
+          <div class="plan-np-cliente">${np.cliente}</div>
+          <div class="plan-np-detalle">${np.detalle}</div>
+          <div class="plan-np-cant">${np.cant} ${np.um}</div>
+          <span class="plan-np-status ${est}">${estLabel}</span>
+        </div>`;
+      });
+    }
+    html += `</div></div>`;
+  });
+
+  html += `</div>`;
+
+  // Futuras por mes
+  const mesesOrdenados = Object.keys(futuras).sort();
+  if (mesesOrdenados.length > 0) {
+    html += `<div class="plan-seccion-titulo"><span>Próximas semanas</span><span>${mesesOrdenados.length} mes(es)</span></div>`;
+    mesesOrdenados.forEach(key => {
+      const npsDelMes = futuras[key].sort((a,b) => a.fechaDate - b.fechaDate);
+      const [anio, mes] = key.split('-');
+      const fechaMes = new Date(parseInt(anio), parseInt(mes)-1, 1);
+      html += `<div class="plan-mes-grupo">
+        <div class="plan-mes-header">
+          ${nombreMes(fechaMes)}
+          <span class="plan-mes-count">${npsDelMes.length} NP${npsDelMes.length!==1?'s':''}</span>
+        </div>
+        <div class="plan-tabla">
+          <div class="plan-tabla-head">
+            <div class="plan-th">Fecha</div>
+            <div class="plan-th">NP</div>
+            <div class="plan-th">Cliente</div>
+            <div class="plan-th">Detalle</div>
+            <div class="plan-th">Cant</div>
+            <div class="plan-th">UM</div>
+            <div class="plan-th">Estado</div>
+          </div>`;
+      npsDelMes.forEach(np => {
+        const est = getEstadoNP(np.lineaId, np.np);
+        const estLabel = est === 'autorizado' ? '✓ Aut.' : est === 'reprogramado' ? '⟳ Reprog.' : '—';
+        html += `<div class="plan-fila ${est !== 'pendiente' ? est : ''}">
+          <div class="plan-td muted">${ddmm(np.fechaDate)}</div>
+          <div class="plan-td mono">NP-${np.np}</div>
+          <div class="plan-td" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${np.cliente}</div>
+          <div class="plan-td muted" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${np.detalle}</div>
+          <div class="plan-td mono">${np.cant}</div>
+          <div class="plan-td muted">${np.um}</div>
+          <div class="plan-td"><span class="plan-np-status ${est}">${estLabel}</span></div>
+        </div>`;
+      });
+      html += `</div></div>`;
+    });
+  }
+
+  // Sin fecha
+  if (sinFecha.length > 0) {
+    html += `<div class="plan-seccion-titulo"><span>Sin fecha programada</span><span>${sinFecha.length} NP${sinFecha.length!==1?'s':''}</span></div>
+      <div class="plan-tabla">
+        <div class="plan-tabla-head">
+          <div class="plan-th">—</div>
+          <div class="plan-th">NP</div>
+          <div class="plan-th">Cliente</div>
+          <div class="plan-th">Detalle</div>
+          <div class="plan-th">Cant</div>
+          <div class="plan-th">UM</div>
+          <div class="plan-th"></div>
+        </div>`;
+    sinFecha.forEach(np => {
+      html += `<div class="plan-fila">
+        <div class="plan-td muted" style="font-family:var(--mono);font-size:10px;">Sin fecha</div>
+        <div class="plan-td mono">NP-${np.np}</div>
+        <div class="plan-td" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${np.cliente}</div>
+        <div class="plan-td muted" style="overflow:hidden;white-space:nowrap;text-overflow:ellipsis;">${np.detalle}</div>
+        <div class="plan-td mono">${np.cant}</div>
+        <div class="plan-td muted">${np.um}</div>
+        <div class="plan-td"></div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  container.innerHTML = html;
+}
+let imputCache = null;
+let imputFiltro = 'todos';
+
+function setImputFiltro(f, btn) {
+  imputFiltro = f;
+  document.querySelectorAll('#fimputTodos,#fimputPend,#fimputSalteo,#fimputDone').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderImputTabla(imputCache || []);
+}
+
+async function renderImputacion(forzar = false) {
+  if (imputCache && !forzar) { renderImputTabla(imputCache); return; }
+  document.getElementById('imputRows').innerHTML = `<div class="empty-state" style="padding:32px;"><div class="spinner dark" style="margin:0 auto 10px;"></div>Cargando...</div>`;
+  const data = await cargarImputaciones();
+  imputCache = data;
+  renderImputTabla(data);
+}
+
+// ── MAPA GLOBAL DE DATOS DE IMPUTACIÓN ───────────────────────────────────────
+// Evita pasar objetos complejos por onclick (problemas con comillas en strings)
+const imputDataMap = {};
+
+function renderImputTabla(data) {
+  const tbody = document.getElementById('imputRows');
+  const ahora = new Date();
+  const pvRDef = document.getElementById('cfgPVRemito')?.value||'00009';
+  const pvFDef = document.getElementById('cfgPVFactura')?.value||'00005';
+
+  let filtered = data;
+  if (imputFiltro === 'pendiente') {
+    filtered = data.filter(r => { const e = String(r.estado||'').toLowerCase(); return e === 'pendiente'; });
+  } else if (imputFiltro === 'salteo') {
+    filtered = data.filter(r => String(r.estado||'').toLowerCase() === 'pendiente de salteo');
+  } else if (imputFiltro === 'imputado') {
+    filtered = data.filter(r => { const e = String(r.estado||'').toLowerCase(); return e === 'imputado' || e.startsWith('salteado'); });
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<div class="empty-state" style="padding:32px;">${data.length===0?'Sin registros. Las autorizaciones aparecen acá automáticamente.':'Sin registros para este filtro.'}</div>`;
+    return;
+  }
+
+  filtered.sort((a,b) => {
+    const ai = String(a.estado||'').toLowerCase()==='imputado' || String(a.estado||'').toLowerCase().startsWith('salteado');
+    const bi = String(b.estado||'').toLowerCase()==='imputado' || String(b.estado||'').toLowerCase().startsWith('salteado');
+    if (ai && !bi) return 1; if (!ai && bi) return -1;
+    return String(a.fechaaut||'').localeCompare(String(b.fechaaut||''));
+  });
+
+  tbody.innerHTML = filtered.map((r,idx) => {
+    imputDataMap[idx] = r; // guardar para acceso desde onclick
+    const salteado = String(r.estado||'').toLowerCase().startsWith('salteado');
+    const pSalteo = String(r.estado||'').toLowerCase() === 'pendiente de salteo';
+    const imp = String(r.estado||'').toLowerCase()==='imputado' || salteado;
+    const pendiente = !imp && !pSalteo;
+    const dias = diasEntre(r.fechaaut, imp?null:ahora);
+    const diaCls = imp?'imputado': dias>=2?'vencido': dias===1?'warn':'ok';
+    const diasLabel = dias!==null?`${dias}d`:'—';
+    const pvr = r.pvremito||pvRDef; const nrr = r.nroremito||'';
+    const pvf = r.pvfactura||pvFDef; const nrf = r.nrofactura||'';
+    const cantReal = r.cantreal||r.cant||'';
+    const umReal = r.um||'';
+    const esDif = r.np === 'DIFERENCIA';
+    return `<div class="hist-row" style="grid-template-columns:90px 80px 1fr 140px 55px 55px 140px 140px 90px 95px;${esDif?'background:var(--accent-light);':''}">
+      <div class="hist-td mono">${r.fechaaut||'—'}</div>
+      <div class="hist-td mono" style="color:${esDif?'var(--text-muted)':'var(--accent)'};">${esDif?'—':('NP-'+r.np)}</div>
+      <div class="hist-td" style="overflow:hidden;"><div style="font-weight:600;font-size:11px;">${r.cliente||'—'}</div><div style="font-size:10px;color:var(--text-muted);">${r.detalle}</div></div>
+      <div class="hist-td">${imp?`<span style="font-family:var(--mono);font-size:11px;">${cantReal} ${umReal}</span>`:`<div style="display:flex;gap:4px;align-items:center;"><input class="imp-inp" id="creal${idx}" type="text" inputmode="decimal" value="${r.cant||''}" style="width:60px;"><input class="imp-inp" id="umreal${idx}" type="text" value="${umReal}" style="width:40px;" placeholder="UM"></div>`}</div>
+      <div class="hist-td"><span class="dias-badge ${diaCls}">${diasLabel}</span></div>
+      <div class="hist-td"><span class="hist-pill ${imp?(salteado?'justif':'aut'):pSalteo?'justif':'pend'}">${salteado?'↷':imp?'✓':pSalteo?'⏸':'⏳'}</span></div>
+      <div class="hist-td">${imp?`<span style="font-family:var(--mono);font-size:10px;">${fmtDoc(r.pvremito,r.nroremito)}</span>`:`<div class="imp-pv"><input class="imp-inp" id="pvr${idx}" value="${pvr}" style="width:45px;" maxlength="5"><span class="imp-pv-sep">-</span><input class="imp-inp" id="nrr${idx}" value="${nrr}" style="width:72px;" placeholder="Nro" maxlength="8"></div>`}</div>
+      <div class="hist-td">${imp?`<span style="font-family:var(--mono);font-size:10px;">${fmtDoc(r.pvfactura,r.nrofactura)}</span>`:`<div class="imp-pv"><input class="imp-inp" id="pvf${idx}" value="${pvf}" style="width:45px;" maxlength="5"><span class="imp-pv-sep">-</span><input class="imp-inp" id="nrf${idx}" value="${nrf}" style="width:72px;" placeholder="Nro" maxlength="8"></div>`}</div>
+      <div class="hist-td mono muted">${imp?(r.fechaimput||'—'):'—'}</div>
+      <div class="hist-td">${salteado
+        ?`<div style="display:flex;flex-direction:column;gap:3px;">
+            <span style="font-family:var(--mono);font-size:8px;color:var(--accent);">↷ ${r.estado.replace('Salteado: ','')}</span>
+            <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}" target="_blank" style="font-family:var(--mono);font-size:8px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:2px 6px;display:inline-block;">✏ Editar</a>
+          </div>`
+        :imp
+          ?`<div style="display:flex;flex-direction:column;gap:3px;">
+              <span style="font-family:var(--mono);font-size:9px;color:var(--green);">✓ Imputado</span>
+              <a href="https://docs.google.com/spreadsheets/d/${SHEET_ID}" target="_blank" style="font-family:var(--mono);font-size:8px;color:var(--text-dim);text-decoration:none;border:1px solid var(--border);padding:2px 6px;display:inline-block;">✏ Editar</a>
+            </div>`
+        :pSalteo
+          ?`<div style="display:flex;flex-direction:column;gap:3px;">
+              <span style="font-family:var(--mono);font-size:8px;color:var(--accent);">⏸ Solicitud pendiente</span>
+              <button class="btn-imputar" style="background:var(--accent);font-size:8px;" onclick="abrirAutorizarSalteo(${idx})">🔐 Autorizar</button>
+            </div>`
+          :`<div style="display:flex;flex-direction:column;gap:4px;">
+              <button class="btn-imputar" onclick="abrirModalImputar(${idx})">Imputar</button>
+              <button class="btn-imputar" style="background:var(--accent-light);border:1px solid var(--accent);color:var(--accent);font-size:8px;" onclick="abrirModalSinNP(${idx})">+ SIN NP</button>
+              <button class="btn-imputar" style="background:transparent;border:1px solid var(--text-dim);color:var(--text-muted);font-size:8px;" onclick="abrirSolicitudSalteo(${idx})">Solicitar salteo ↷</button>
+            </div>`
+      }</div>
+    </div>`;
+  }).join('');
+}
+
+function filaDiferencia() { return ''; } // eliminado — SIN NP está dentro del modal de imputar
+
+
+
+// ── SOLICITUD DE SALTEO (Paola) ───────────────────────────────────────────────
+let solSalteoRow = null;
+let solSalteoIdx = null;
+
+function abrirSolicitudSalteo(idx) {
+  const r = imputDataMap[idx];
+  if (!r) { toast('Error: datos no encontrados','error'); return; }
+  solSalteoRow = r;
+  solSalteoIdx = idx;
+  // Leer cantidad real que Paola puede haber editado en la tabla
+  const cantInput = document.getElementById(`creal${idx}`);
+  if (cantInput && cantInput.value.trim()) {
+    solSalteoRow = { ...r, cantreal: parsearCant(cantInput.value) || r.cant };
+  }
+  document.getElementById('solSalteoNPNum').textContent = `NP-${r.np} · ${r.cliente}`;
+  document.getElementById('solSalteoNPDet').textContent = `${r.cant} ${r.um} — ${r.detalle}`;
+  document.getElementById('solSalteoPVR').value = document.getElementById('cfgPVRemito')?.value||'00009';
+  document.getElementById('solSalteoNRR').value = '';
+  document.getElementById('solicitudSalteoModal').classList.add('open');
+  setTimeout(() => document.getElementById('solSalteoNRR').focus(), 100);
+}
+
+async function confirmarSolicitudSalteo() {
+  const pvr = document.getElementById('solSalteoPVR').value.trim()||'00009';
+  const nrr = document.getElementById('solSalteoNRR').value.trim();
+  if (!nrr) { toast('El N° de remito es obligatorio','warn'); return; }
+  const motivo = document.getElementById('solSalteoMotivo').value;
+  const r = solSalteoRow;
+  await guardarImputacion({
+    ...r,
+    pvremito: pvr.padStart(5,'0'),
+    nroremito: nrr.padStart(8,'0'),
+    pvfactura: '', nrofactura: '',
+    estado: 'Pendiente de salteo',
+    notasalteo: motivo
+  });
+  document.getElementById('solicitudSalteoModal').classList.remove('open');
+  toast(`Solicitud de salteo enviada — NP-${r.np}`, 'info');
+  imputCache = null;
+  renderImputacion(true);
+}
+
+document.getElementById('solicitudSalteoModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// ── AUTORIZAR SALTEO (Gonzalo, con PIN) ───────────────────────────────────────
+const PIN_SALTEAR = '2359';
+let autSalteoRow = null;
+
+function abrirAutorizarSalteo(idx) {
+  const r = imputDataMap[idx];
+  if (!r) { toast('Error: datos no encontrados','error'); return; }
+  autSalteoRow = r;
+  document.getElementById('autSalteoNPNum').textContent = `NP-${r.np} · ${r.cliente}`;
+  document.getElementById('autSalteoNPDet').textContent = `${r.cant} ${r.um} — ${r.detalle}`;
+  document.getElementById('autSalteoRemito').textContent = `Remito: ${fmtDoc(r.pvremito, r.nroremito)}`;
+  document.getElementById('autSalteoMotivo').textContent = r.notasalteo || '';
+  document.getElementById('autSalteoCant').value = r.cantreal || r.cant || '';
+  document.getElementById('autSalteoUM').value = r.um || '';
+  document.getElementById('autSalteoPin').value = '';
+  document.getElementById('autSalteoError').style.display = 'none';
+  document.getElementById('autorizarSalteoModal').classList.add('open');
+  setTimeout(() => document.getElementById('autSalteoPin').focus(), 100);
+}
+
+async function confirmarAutorizarSalteo() {
+  const pin = document.getElementById('autSalteoPin').value.trim();
+  if (pin !== PIN_SALTEAR) {
+    document.getElementById('autSalteoError').style.display = 'block';
+    document.getElementById('autSalteoPin').value = '';
+    document.getElementById('autSalteoPin').focus();
+    return;
+  }
+  const r = autSalteoRow;
+  const cantreal = parsearCant(document.getElementById('autSalteoCant').value) || parsearCant(r.cant);
+  const umreal = document.getElementById('autSalteoUM').value.trim() || r.um;
+  const ahora = new Date(); const p = x=>String(x).padStart(2,'0');
+  const hoy = `${p(ahora.getDate())}/${p(ahora.getMonth()+1)}/${ahora.getFullYear()}`;
+  await guardarImputacion({
+    ...r,
+    cantreal,
+    um: umreal,
+    pvfactura: '00000', nrofactura: '00000000',
+    fechaimput: hoy,
+    diasdemora: diasEntre(r.fechaaut, ahora)||0,
+    estado: `Salteado: ${r.notasalteo||'Autorizado'}`
+  });
+  document.getElementById('autorizarSalteoModal').classList.remove('open');
+  toast(`Salteo autorizado — NP-${r.np}`, 'success');
+  imputCache = null;
+  await checkImputacionesPendientes();
+  renderImputacion(true);
+}
+
+async function rechazarSalteo() {
+  const r = autSalteoRow;
+  await guardarImputacion({ ...r, estado: 'Pendiente', pvremito:'', nroremito:'', notasalteo:'' });
+  document.getElementById('autorizarSalteoModal').classList.remove('open');
+  toast(`Solicitud rechazada — NP-${r.np} vuelve a Pendiente`, 'warn');
+  imputCache = null;
+  renderImputacion(true);
+}
+
+document.getElementById('autorizarSalteoModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+// ── MODAL IMPUTAR CON SIN NP ──────────────────────────────────────────────────
+let modalImputRow = null;
+let modalImputIdx = null;
+
+function abrirModalImputar(idx) {
+  const r = imputDataMap[idx];
+  if (!r) { toast('Error: datos no encontrados','error'); return; }
+  modalImputRow = r;
+  modalImputIdx = idx;
+  document.getElementById('modalImputNP').textContent = `NP-${r.np} · ${r.cliente}`;
+  document.getElementById('modalImputDet').textContent = `${r.cant} ${r.um} — ${r.detalle}`;
+  document.getElementById('modalImputCant').value = r.cant||'';
+  document.getElementById('modalImputUM').value = r.um||'';
+  document.getElementById('modalImputPVR').value = document.getElementById('cfgPVRemito')?.value||'00009';
+  document.getElementById('modalImputNRR').value = '';
+  document.getElementById('modalImputPVF').value = document.getElementById('cfgPVFactura')?.value||'00005';
+  document.getElementById('modalImputNRF').value = '';
+  document.getElementById('sinNPSection').style.display = 'none';
+  document.getElementById('sinNPCant').value = '';
+  document.getElementById('sinNPUM').value = r.um||'';
+  document.getElementById('sinNPDetalle').value = '';
+  document.getElementById('modalImputar').classList.add('open');
+}
+
+function abrirModalSinNP(idx) {
+  const r = imputDataMap[idx];
+  if (!r) { toast('Error: datos no encontrados','error'); return; }
+  // Abrir modal imputar con SIN NP ya expandido y campos de NP bloqueados
+  abrirModalImputar(idx, r);
+  // Activar sección SIN NP automáticamente
+  setTimeout(() => {
+    document.getElementById('sinNPSection').style.display = 'block';
+    document.getElementById('btnSinNP').textContent = '✕ Quitar SIN NP';
+    document.getElementById('sinNPCant').focus();
+  }, 50);
+}
+
+function toggleSinNP() {
+  const sec = document.getElementById('sinNPSection');
+  const btn = document.getElementById('btnSinNP');
+  const visible = sec.style.display !== 'none';
+  sec.style.display = visible ? 'none' : 'block';
+  btn.textContent = visible ? '+ Agregar SIN NP' : '✕ Quitar SIN NP';
+}
+
+async function confirmarImputar() {
+  const r = modalImputRow;
+  const pvr = document.getElementById('modalImputPVR').value.trim()||'';
+  const nrr = document.getElementById('modalImputNRR').value.trim()||'';
+  const pvf = document.getElementById('modalImputPVF').value.trim()||'';
+  const nrf = document.getElementById('modalImputNRF').value.trim()||'';
+  const crealRaw = document.getElementById('modalImputCant').value.trim()||r.cant||'';
+  const creal = parsearCant(crealRaw) || crealRaw; // usar valor parseado o raw
+  const umreal = document.getElementById('modalImputUM').value.trim()||r.um||'';
+  if (!nrr||!nrf) { toast('Completá N° de Remito y Factura','warn'); return; }
+
+  const ahora = new Date(); const p = x=>String(x).padStart(2,'0');
+  const fechaimput = `${p(ahora.getDate())}/${p(ahora.getMonth()+1)}/${ahora.getFullYear()}`;
+  const diasdemora = diasEntre(r.fechaaut, ahora)||0;
+
+  await guardarImputacion({
+    ...r,
+    cantreal: creal, um: umreal,
+    pvremito: pvr.padStart(5,'0'), nroremito: nrr.padStart(8,'0'),
+    pvfactura: pvf.padStart(5,'0'), nrofactura: nrf.padStart(8,'0'),
+    fechaimput, diasdemora, estado:'Imputado'
+  });
+
+  const sinNPVisible = document.getElementById('sinNPSection').style.display !== 'none';
+  const sinNPCantRaw = document.getElementById('sinNPCant').value.trim();
+  const sinNPCant = parsearCant(sinNPCantRaw) || sinNPCantRaw;
+  if (sinNPVisible && sinNPCantRaw) {
+    const sinNPUM = document.getElementById('sinNPUM').value.trim()||umreal;
+    const sinNPDet = document.getElementById('sinNPDetalle').value.trim()||r.detalle;
+    await guardarImputacion({
+      lineaid: `SINNP_${Date.now()}`,
+      fechaaut: fechaimput,
+      np: 'SIN NP',
+      cliente: r.cliente,
+      detalle: sinNPDet,
+      cant: sinNPCant, cantreal: sinNPCant, um: sinNPUM,
+      pvremito: pvr.padStart(5,'0'), nroremito: nrr.padStart(8,'0'),
+      pvfactura: pvf.padStart(5,'0'), nrofactura: nrf.padStart(8,'0'),
+      fechaimput, diasdemora: 0, estado:'Imputado'
+    });
+    toast(`Imputado + SIN NP adicional para ${r.cliente}`, 'success');
+  } else {
+    toast(`NP-${r.np} imputada correctamente`, 'success');
+  }
+
+  document.getElementById('modalImputar').classList.remove('open');
+  imputCache = null;
+  await checkImputacionesPendientes();
+  renderImputacion(true);
+}
+
+document.getElementById('modalImputar').addEventListener('click', e => {
+  if (e.target === e.currentTarget) e.currentTarget.classList.remove('open');
+});
+
+async function exportImputCSV() {
+  const data = await cargarImputaciones();
+  const h = ['Fecha Aut.','NP','Cliente','Detalle','Cant','UM','PV Remito','N° Remito','PV Factura','N° Factura','Fecha Imput.','Días Demora','Estado'];
+  const rows = data.map(r=>[r.fechaaut,r.np,r.cliente,r.detalle,r.cant,r.um,r.pvremito,r.nroremito,r.pvfactura,r.nrofactura,r.fechaimput,r.diasdemora,r.estado]);
+  const csv = [h,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=`imputacion_${isoHoy()}.csv`; a.click();
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(`tab-${name}`).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('statsBar').style.display = name==='panel'?'':'none';
+  if (name==='historial') applyHistFilter();
+  if (name==='imputacion') renderImputacion();
+  if (name==='plan') loadPlanSemanal();
+}
+
+// Bloqueo imputación en sendAutorizacion — reemplaza la función original
+bindFirma();
+renderDests();
+initHistFiltros();
+checkPendientesAyer();
+checkImputacionesPendientes();
+loadFromSheets().then(() => {
+  guardarSnapshotHoy();
+});
+</script>
+</body>
+</html>
